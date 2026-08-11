@@ -69,7 +69,9 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',
     'django.contrib.staticfiles',
+    'cloudinary',
     'django.contrib.sites',
     'django.contrib.sitemaps',
     'myapp',
@@ -185,23 +187,28 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # bundled staticfiles dir on serverless platforms like Vercel).
 WHITENOISE_USE_FINDERS = True
 
-# Media (user uploaded photography / video)
+# Media (user uploaded photography / video) — stored on Cloudinary.
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# On Vercel the serverless filesystem is read-only, so uploads go to Vercel
-# Blob storage when a token is configured. Falls back to the local filesystem
-# for development.
-if os.environ.get('BLOB_READ_WRITE_TOKEN'):
-    STORAGES = {
-        'default': {
-            'BACKEND': 'myapp.vercel_blob_storage.VercelBlobStorage',
-            'OPTIONS': {'access': 'public'},
-        },
-        'staticfiles': {
-            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
-        },
-    }
+# Cloudinary configuration (set CLOUDINARY_CLOUD_NAME / CLOUDINARY_API_KEY /
+# CLOUDINARY_API_SECRET in .env locally and as Vercel env vars).
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', ''),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', ''),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', ''),
+}
+
+# Default storage → Cloudinary (works on Vercel's read-only filesystem).
+# Video FileFields override with the video storage class.
+STORAGES = {
+    'default': {
+        'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+    },
+}
 
 # Upload limits — allow large photo/video uploads through the admin.
 # FILE_UPLOAD_MAX_MEMORY_SIZE caps a single uploaded file;

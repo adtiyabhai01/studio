@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 
+from cloudinary_storage.storage import VideoMediaCloudinaryStorage
+
 # ---------------------------------------------------------------------------
 # Choices / constants
 # ---------------------------------------------------------------------------
@@ -353,7 +355,7 @@ class Service(TimeStampedModel):
     short_description = models.CharField(max_length=220, blank=True)
     description = models.TextField(blank=True)
     image = models.ImageField(upload_to="services/", blank=True, null=True)
-    video = models.FileField(upload_to="services/", blank=True, null=True)
+    video = models.FileField(upload_to="services/", blank=True, null=True, storage=VideoMediaCloudinaryStorage())
     video_poster = models.ImageField(upload_to="services/posters/", blank=True, null=True)
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -433,7 +435,7 @@ class PortfolioVideo(models.Model):
         PortfolioCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name="videos"
     )
     title = models.CharField(max_length=200, blank=True)
-    video = models.FileField(upload_to="portfolio/videos/", blank=True, null=True)
+    video = models.FileField(upload_to="portfolio/videos/", blank=True, null=True, storage=VideoMediaCloudinaryStorage())
     youtube_url = models.URLField(blank=True, help_text="YouTube embed URL if not uploading a video file.")
     poster = models.ImageField(upload_to="portfolio/posters/", blank=True, null=True)
     is_featured = models.BooleanField(default=False)
@@ -531,7 +533,7 @@ class Offer(TimeStampedModel):
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
     image = models.ImageField(upload_to="offers/", blank=True, null=True)
-    video = models.FileField(upload_to="offers/videos/", blank=True, null=True)
+    video = models.FileField(upload_to="offers/videos/", blank=True, null=True, storage=VideoMediaCloudinaryStorage())
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
@@ -643,7 +645,7 @@ class Enquiry(models.Model):
 
 class HeroVideo(models.Model):
     title = models.CharField(max_length=120, blank=True)
-    video = models.FileField(upload_to="hero/", blank=True, null=True, help_text="MP4 recommended.")
+    video = models.FileField(upload_to="hero/", blank=True, null=True, help_text="MP4 recommended.", storage=VideoMediaCloudinaryStorage())
     poster = models.ImageField(upload_to="hero/", blank=True, null=True, help_text="Shown until video loads.")
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
