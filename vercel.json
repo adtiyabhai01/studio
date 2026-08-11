@@ -1,7 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "pip install --break-system-packages -r myproject/requirements.txt",
-  "buildCommand": "python myproject/manage.py collectstatic --noinput",
+  "installCommand": "pip install --break-system-packages -r myproject/requirements.txt && python myproject/manage.py collectstatic --noinput",
   "rewrites": [
     {
       "source": "/(.*)",
