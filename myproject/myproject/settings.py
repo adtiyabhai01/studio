@@ -41,12 +41,20 @@ _load_dotenv(BASE_DIR / '.env')
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-6-$msm$a#fm5mo$t7cawp(m!i$ugobwb7=!gea9ui7713poj&l'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-6-$msm$a#fm5mo$t7cawp(m!i$ugobwb7=!gea9ui7713poj&l')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
+if os.environ.get('VERCEL'):
+    DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [h for h in os.environ.get('ALLOWED_HOSTS', '').split(',') if h]
+if not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ['.vercel.app', 'localhost', '127.0.0.1']
+
+CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if o]
+if not CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app']
 
 # Allow the Django admin CMS to render inside the admin portal's iframe
 # (same-origin only — cross-site framing stays blocked).
@@ -163,7 +171,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
