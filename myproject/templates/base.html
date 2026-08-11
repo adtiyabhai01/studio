@@ -1,0 +1,96 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ site.brand_name }} — {{ site.tagline }}{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{{ site.site_description }}{% endblock %}">
+  <link rel="canonical" href="{{ request.build_absolute_uri }}">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ site.brand_name }}">
+  <meta property="og:title" content="{% block og_title %}{{ site.brand_name }} — {{ site.tagline }}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{{ site.site_description }}{% endblock %}">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+  {% block og_image %}{% if site.hero_fallback %}
+  <meta property="og:image" content="{{ site.hero_fallback.url }}">
+  {% endif %}{% endblock %}
+  <meta name="theme-color" content="#0e0d0c">
+
+  <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Marcellus&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Manrope:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600&family=Inter:wght@300;400;500;600&family=Jost:wght@300;400;500;600&family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components.css' %}">
+  {% include "partials/theme_vars.html" %}
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="page page--{{ active|default:'base' }}">
+
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="pre-inner">
+      <div class="pre-badge">
+        <svg class="pre-ring" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="pre-ring-track" cx="60" cy="60" r="52"></circle>
+          <circle class="pre-ring-bar" cx="60" cy="60" r="52"></circle>
+        </svg>
+        <span class="pre-mark">
+          {% if site.logo %}
+            <img class="pre-logo" src="{{ site.logo.url }}" alt="{{ site.brand_name }}">
+          {% else %}
+            {{ site.brand_name|slice:":1" }}
+          {% endif %}
+        </span>
+      </div>
+      <p class="pre-name">{{ site.brand_name }}</p>
+      <span class="pre-bar"><span class="pre-bar-fill"></span></span>
+      <p class="pre-caption">Filming your story&hellip;</p>
+    </div>
+  </div>
+
+  {% include "partials/navbar.html" %}
+
+  <main class="site-main">
+    {% if messages %}
+      <div class="page-alerts">
+        {% for message in messages %}
+          <div class="page-alert page-alert--{{ message.tags|default:'info' }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include "partials/footer.html" %}
+
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="lightbox-close" id="lightboxClose" aria-label="Close">×</button>
+    <button class="lightbox-nav lightbox-nav--prev" id="lightboxPrev" aria-label="Previous">‹</button>
+    <button class="lightbox-nav lightbox-nav--next" id="lightboxNext" aria-label="Next">›</button>
+    <figure class="lightbox-frame">
+      <img id="lightboxImg" src="" alt="">
+      <figcaption id="lightboxCap"></figcaption>
+    </figure>
+  </div>
+
+  <div class="video-modal" id="videoModal" aria-hidden="true">
+    <button class="lightbox-close" id="videoModalClose" aria-label="Close">×</button>
+    <div class="video-modal-frame" id="videoModalFrame"></div>
+  </div>
+
+  <a class="wa-float" href="{{ wa_message }}" target="_blank" rel="noopener"
+     aria-label="Chat with us on WhatsApp">
+    <svg viewBox="0 0 32 32" width="26" height="26" fill="currentColor" aria-hidden="true">
+      <path d="M16.05 3C9.4 3 3.9 8.5 3.9 15.2c0 2.15.56 4.24 1.63 6.08L3.7 29l7.4-1.85a12.1 12.1 0 0 0 4.94 1.05h.01c6.65 0 12.14-5.5 12.14-12.2S22.7 3 16.05 3zm0 22.17h-.01a10 10 0 0 1-5.08-1.39l-.36-.22-4.36 1.14 1.15-4.28-.24-.38a10.02 10.02 0 0 1-1.54-5.34c0-5.52 4.5-10.03 10.04-10.03 5.5 0 9.98 4.5 9.98 10.02 0 5.53-4.48 10.03-10.02 10.03zm5.4-7.45c-.3-.15-1.75-.86-2.02-.96-.27-.1-.48-.14-.68.15-.2.27-.76.96-.93 1.16-.18.18-.31.2-.57.07-.32-.15-1.27-.47-2.42-1.5-.9-.8-1.5-1.8-1.67-2.09-.17-.3-.02-.47.13-.63.14-.14.3-.32.43-.47.14-.16.2-.28.3-.46.1-.2.04-.35-.02-.48-.06-.15-.66-1.6-.9-2.2-.25-.56-.5-.49-.66-.5h-.57c-.2 0-.5.07-.77.35-.25.29-.98.96-.98 2.35s1 2.74 1.15 2.92c.17.18 1.98 3.03 4.8 4.25.67.29 1.19.46 1.6.6.67.22 1.28.19 1.77.12.54-.09 1.66-.68 1.9-1.33.23-.65.2-1.22.16-1.34-.05-.1-.25-.18-.57-.33z"/>
+    </svg>
+    <span class="wa-float-label">WhatsApp</span>
+  </a>
+
+  {% block extra_js %}{% endblock %}
+  <script src="{% static 'js/base.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{% if theme.is_custom %}
+<style id="theme-vars">
+  :root {
+    --bg: {{ theme.background }};
+    --bg-2: {{ theme.background_secondary }};
+    --ink: {{ theme.ink }};
+    --ink-2: {{ theme.ink_secondary }};
+    --ivory: {{ theme.ivory }};
+    --ivory-2: {{ theme.ivory_secondary }};
+    --cream: {{ theme.cream }};
+    --gold: {{ theme.primary }};
+    --gold-strong: {{ theme.primary_strong }};
+    --gold-deep: {{ theme.primary_deep }};
+    --muted: {{ theme.muted }};
+    --muted-2: {{ theme.muted_secondary }};
+    --line: color-mix(in srgb, {{ theme.primary }} 24%, transparent);
+    --line-soft: color-mix(in srgb, {{ theme.primary }} 16%, transparent);
+    --serif: {{ theme.heading_font }};
+    --sans: {{ theme.body_font }};
+    --container: {{ theme.container_width }}px;
+  }
+</style>
+{% endif %}

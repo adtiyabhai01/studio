@@ -1,0 +1,110 @@
+# =====================================================================
+# Python / Django
+# =====================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+myenv/
+venv/
+env/
+.venv/
+env.bak/
+venv.bak/
+
+# =====================================================================
+# Django (project-specific)
+# =====================================================================
+
+# Local database (regenerate with: python manage.py migrate && bootstrap)
+myproject/db.sqlite3
+myproject/db.sqlite3-journal
+
+# Collected static files (output of `collectstatic`)
+myproject/staticfiles/
+
+# User-uploaded media (photos, videos, posters, logos)
+myproject/media/
+
+# Django logs
+*.log
+
+# =====================================================================
+# Environment / secrets
+# =====================================================================
+
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# =====================================================================
+# Editors / IDEs
+# =====================================================================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.vim/
+
+# =====================================================================
+# OS
+# =====================================================================
+
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# =====================================================================
+# Misc
+# =====================================================================
+
+# Test / coverage output
+.coverage
+htmlcov/
+.tox/
+.nox/
+.cache/
+pytest_cache/
+.hypothesis/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Jupyter
+.ipynb_checkpoints/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json

@@ -1,0 +1,17 @@
+/* =========================================================
+   baby.css — baby shoot service page styles.
+   ========================================================= */
+
+.svc-intro { max-width: 720px; margin-inline: auto; text-align: center; }
+.svc-intro-text { margin-top: 18px; color: var(--muted); font-size: 1.02rem; }
+
+#gallery { background: linear-gradient(180deg, #fbf7f0, var(--ivory)); }
+#gallery .section-head { margin-inline: auto; text-align: center; }
+#gallery .masonry { margin-top: 12px; }
+
+#films, #offers { background: var(--bg-2); }
+#baby-packages .section-head { margin-inline: auto; text-align: center; }
+
+@media (max-width: 720px) {
+  .svc-hero { min-height: 68vh; }
+}

@@ -1,0 +1,17 @@
+{% extends "admin_portal/base.html" %}
+{% block title %}Delete {{ section.singular|lower }} · {{ section.name }} · Admin Portal{% endblock %}
+{% block content %}
+  <div class="ap-cm-delbox">
+    <h2 class="ap-cm-del-title">Delete “{{ object }}”?</h2>
+    <p class="ap-cm-del-sub">
+      This will permanently remove this {{ section.singular|lower }}. This action cannot be undone.
+    </p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="ap-cm-actions">
+        <button class="btn btn--danger" type="submit">Delete {{ section.singular|lower }}</button>
+        <a class="btn btn--ghost" href="{% url 'main:portal_content_list' section.key %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

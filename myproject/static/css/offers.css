@@ -1,0 +1,19 @@
+/* =========================================================
+   offers.css — offers page styles.
+   ========================================================= */
+
+.offers-grid { margin-top: 8px; }
+
+.offers-grid--stack .offer-card {
+  flex-direction: row;
+  align-items: stretch;
+}
+.offers-grid--stack .offer-card-media { width: 42%; aspect-ratio: auto; }
+.offers-grid--stack .offer-card-body { flex: 1; }
+
+.empty { text-align: center; }
+
+@media (max-width: 860px) {
+  .offers-grid--stack .offer-card { flex-direction: column; }
+  .offers-grid--stack .offer-card-media { width: 100%; aspect-ratio: 16 / 9; }
+}

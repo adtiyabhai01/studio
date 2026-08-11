@@ -1,0 +1,9 @@
+<figure class="g-item reveal" data-cat="{{ image.category.slug|default:'all' }}">
+  <button type="button" class="g-item-btn"
+          data-lightbox="{{ image.image.url }}"
+          data-caption="{{ image.title|default:image.get_alt }}"
+          aria-label="Open photo">
+    <img class="g-item-img" src="{{ image.image.url }}" alt="{{ image.get_alt }}" loading="lazy">
+  </button>
+  <figcaption class="g-item-cap">{{ image.category.name|default:"" }}</figcaption>
+</figure>

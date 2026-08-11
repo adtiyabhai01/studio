@@ -1,0 +1,23 @@
+/* =========================================================
+   testimonials.css — client stories page styles.
+   ========================================================= */
+
+.t-grid { margin-top: 8px; }
+
+/* Editorial 3-column layout with a nice rhythm break */
+.t-grid--all {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+.t-grid--all .t-card:nth-child(3n + 2) { transform: translateY(34px); }
+.t-grid--all .t-card { background: var(--ink-2); }
+
+.empty { text-align: center; }
+
+@media (max-width: 1000px) {
+  .t-grid--all { grid-template-columns: 1fr 1fr; }
+  .t-grid--all .t-card:nth-child(3n + 2) { transform: none; }
+}
+@media (max-width: 620px) {
+  .t-grid--all { grid-template-columns: 1fr; }
+}

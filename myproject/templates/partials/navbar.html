@@ -1,0 +1,48 @@
+{% load static %}
+<header class="site-nav" id="siteNav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="/" aria-label="{{ site.brand_name }} — home">
+      {% if site.logo %}
+        <img class="nav-brand-logo" src="{{ site.logo.url }}" alt="{{ site.brand_name }} logo">
+      {% else %}
+        <span class="nav-brand-mark">C</span>
+        <span class="nav-brand-text">{{ site.brand_name }}</span>
+      {% endif %}
+    </a>
+
+    <nav class="nav-links" aria-label="Primary">
+      <a href="/" class="nav-link {% if active == 'home' %}nav-link--active{% endif %}" data-nav>Home</a>
+      <a href="{% url 'main:about' %}" class="nav-link {% if active == 'about' %}nav-link--active{% endif %}" data-nav>About</a>
+      <a href="{% url 'main:services' %}" class="nav-link {% if active == 'services' %}nav-link--active{% endif %}" data-nav>Services</a>
+      <a href="{% url 'main:portfolio' %}" class="nav-link {% if active == 'portfolio' %}nav-link--active{% endif %}" data-nav>Portfolio</a>
+      <a href="{% url 'main:packages' %}" class="nav-link {% if active == 'packages' %}nav-link--active{% endif %}" data-nav>Packages</a>
+      <a href="{% url 'main:offers' %}" class="nav-link {% if active == 'offers' %}nav-link--active{% endif %}" data-nav>Offers</a>
+      <a href="{% url 'main:testimonials' %}" class="nav-link {% if active == 'testimonials' %}nav-link--active{% endif %}" data-nav>Stories</a>
+      <a href="{% url 'main:contact' %}" class="nav-link {% if active == 'contact' %}nav-link--active{% endif %}" data-nav>Contact</a>
+    </nav>
+
+    <div class="nav-cta">
+      <a href="{% url 'main:contact' %}" class="btn btn--ghost btn--nav">Enquire Now</a>
+      <button class="nav-burger" id="navBurger" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="nav-drawer" id="navDrawer" aria-hidden="true">
+    <nav class="nav-drawer-links" aria-label="Mobile">
+      <a href="/" class="nav-drawer-link {% if active == 'home' %}nav-link--active{% endif %}" data-nav>Home</a>
+      <a href="{% url 'main:about' %}" class="nav-drawer-link {% if active == 'about' %}nav-link--active{% endif %}" data-nav>About</a>
+      <a href="{% url 'main:services' %}" class="nav-drawer-link {% if active == 'services' %}nav-link--active{% endif %}" data-nav>Services</a>
+      <a href="{% url 'main:portfolio' %}" class="nav-drawer-link {% if active == 'portfolio' %}nav-link--active{% endif %}" data-nav>Portfolio</a>
+      <a href="{% url 'main:packages' %}" class="nav-drawer-link {% if active == 'packages' %}nav-link--active{% endif %}" data-nav>Packages</a>
+      <a href="{% url 'main:offers' %}" class="nav-drawer-link {% if active == 'offers' %}nav-link--active{% endif %}" data-nav>Offers</a>
+      <a href="{% url 'main:testimonials' %}" class="nav-drawer-link {% if active == 'testimonials' %}nav-link--active{% endif %}" data-nav>Stories</a>
+      <a href="{% url 'main:contact' %}" class="nav-drawer-link {% if active == 'contact' %}nav-link--active{% endif %}" data-nav>Contact</a>
+    </nav>
+    <div class="nav-drawer-foot">
+      <a class="btn btn--gold" href="{% url 'main:contact' %}">Book Your Date</a>
+      <span>{{ site.phones }}</span>
+    </div>
+  </div>
+</header>

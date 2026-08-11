@@ -1,0 +1,92 @@
+/* =========================================================
+   about.css — about-page-only styles (story, philosophy,
+   team, visual composition).
+   ========================================================= */
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: clamp(40px, 6vw, 90px);
+  align-items: center;
+}
+.about-story .section-title { max-width: 18ch; }
+.about-p { color: var(--muted); margin-top: 18px; max-width: 54ch; }
+.section--alt .about-p { color: var(--muted-2); }
+.about-quote {
+  margin-top: 30px;
+  padding-left: 22px;
+  border-left: 2px solid var(--gold);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--gold-strong);
+}
+
+.about-visual .about-frame {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: linear-gradient(150deg, #2a241d, #13110e);
+  border: 1px solid var(--line);
+}
+.about-frame img { width: 100%; height: 100%; object-fit: cover; }
+.about-frame::after {
+  content: "";
+  position: absolute; inset: 14px;
+  border: 1px solid rgba(217, 189, 139, 0.4);
+  pointer-events: none;
+}
+.about-frame-mono {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  font-family: var(--serif); font-size: 7rem; color: var(--gold);
+}
+
+.about-stats { border-block: 1px solid var(--line); }
+
+/* ---------- why choose us ---------- */
+
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.why { background: var(--bg-2); padding: 34px 30px; }
+.why h3 { font-size: 1.3rem; margin-bottom: 12px; color: var(--gold-strong); }
+.why p { color: var(--muted); font-size: 0.95rem; }
+
+/* ---------- team ---------- */
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 32px;
+}
+.team { text-align: center; }
+.team-photo {
+  width: 100%; aspect-ratio: 4 / 5; object-fit: cover;
+  border-radius: 2px;
+  filter: saturate(0.92);
+  transition: filter var(--tr), transform var(--tr);
+}
+.team:hover .team-photo { filter: none; transform: translateY(-4px); }
+.team-photo--mono {
+  display: grid; place-items: center;
+  background: linear-gradient(160deg, #2b251e, #16130f);
+  border: 1px solid var(--line);
+  font-family: var(--serif); font-size: 4.5rem; color: var(--gold);
+}
+.team-name { margin-top: 18px; font-size: 1.3rem; }
+.team-role { color: var(--muted); font-size: 0.85rem; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 6px; }
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 860px) {
+  .about-grid { grid-template-columns: 1fr; }
+  .why-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px) {
+  .why-grid { grid-template-columns: 1fr; }
+}

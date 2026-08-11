@@ -1,0 +1,13 @@
+<section class="cta-band {% block cta_extra_class %}{% endblock %}">
+  <div class="container cta-inner">
+    <div class="cta-content reveal">
+      <p class="eyebrow eyebrow--gold">Booking {{ site.tagline }}</p>
+      <h2 class="cta-heading">{{ cta_heading|default:"Let's craft a story that lasts forever." }}</h2>
+      <p class="cta-text">{{ cta_text|default:"Tell us about your day — we'll answer within a few hours." }}</p>
+    </div>
+    <div class="cta-actions reveal">
+      <a class="btn btn--gold btn--lg" href="{% url 'main:contact' %}">Check Availability</a>
+      <a class="btn btn--ghost btn--lg" href="{{ wa_message }}" target="_blank" rel="noopener">WhatsApp Us</a>
+    </div>
+  </div>
+</section>

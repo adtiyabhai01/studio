@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Client Stories — {{ site.brand_name }}{% endblock %}
+{% block meta_description %}Real reviews from the couples and families we've filmed — weddings, pre-weddings, engagements, maternity and baby shoots across cities.{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/testimonials.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="container">
+    <p class="eyebrow eyebrow--gold reveal">Client stories</p>
+    <h1 class="page-hero-title reveal">Said with <em>&ldquo;we cried&rdquo;</em></h1>
+    <p class="page-hero-sub reveal">Reviews from the families and couples who trusted us with their forever.</p>
+  </div>
+</section>
+
+<section class="section section--pad">
+  <div class="container">
+    {% if testimonials %}
+      <div class="t-grid t-grid--all">
+        {% for testimonial in testimonials %}
+          {% include "partials/testimonial_card.html" with testimonial=testimonial %}
+          {% if forloop.counter|divisibleby:3 and not forloop.last %}
+            <div class="t-grid-break" aria-hidden="true"></div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty">Reviews will appear here as soon as they're added from the admin.</p>
+    {% endif %}
+  </div>
+</section>
+
+{% include "partials/cta.html" %}
+
+{% endblock %}

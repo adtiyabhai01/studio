@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Baby Shoot — {{ site.brand_name }}{% endblock %}
+{% block meta_description %}Safe, playful newborn and baby photography — studio or at home. Tiny toes, first smiles and first birthdays, captured forever. Check our baby shoot packages.{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/baby.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="svc-hero">
+  {% if hero_video %}
+    <video class="svc-hero-video" autoplay muted loop playsinline preload="none" poster="{% if service.video_poster %}{{ service.video_poster.url }}{% endif %}">
+      <source src="{{ hero_video.url }}" type="video/mp4">
+    </video>
+  {% elif hero_image %}
+    <img class="svc-hero-img" src="{{ hero_image.url }}" alt="{{ page_heading }}" fetchpriority="high">
+  {% endif %}
+  <div class="svc-hero-shade"></div>
+  <div class="container svc-hero-content">
+    <p class="eyebrow eyebrow--gold reveal">Baby Stories</p>
+    <h1 class="page-hero-title reveal">Tiny toes, <em>giant moments</em></h1>
+    <p class="page-hero-sub reveal">{{ service.tagline|default:"Newborn cuddles to first birthdays — we photograph the small, the soft and the unforgettable." }}</p>
+    <div class="hero-actions reveal">
+      <a href="{% url 'main:packages' %}" class="btn btn--gold btn--lg">See Baby Packages</a>
+      <a href="{{ hero_wa }}" target="_blank" rel="noopener" class="btn btn--ghost btn--lg">WhatsApp Us</a>
+    </div>
+  </div>
+</section>
+
+<section class="section section--pad">
+  <div class="container">
+    <div class="svc-intro reveal">
+      <p class="eyebrow eyebrow--gold">A safe little set</p>
+      <h2 class="section-title">Three months, <em>a thousand expressions</em></h2>
+      <p class="svc-intro-text">{{ service.description|default:"We shoot newborns, 3-month, 6-month and first-birthday sessions in clean, warm, hospital-safe setups. Parents stay beside baby the whole time, and everything — positions, props, even the squeaks — is baby-led." }}</p>
+    </div>
+  </div>
+</section>
+
+{% if images %}
+<section class="section section--pad section--alt" id="gallery">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">Baby gallery</p>
+      <h2 class="section-title">Gummies, yawns &amp; <em>little frowns</em></h2>
+    </header>
+    <div class="masonry">
+      {% for image in images|slice:":8" %}
+        {% include "partials/gallery_item.html" with image=image %}
+      {% endfor %}
+    </div>
+    <div class="section-more reveal">
+      <a href="{% url 'main:portfolio' %}?category=baby" class="btn btn--ghost">View all baby shoots <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if videos %}
+<section class="section section--pad section--dark" id="films">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">Baby films</p>
+      <h2 class="section-title">A keepsake for <em>every age</em></h2>
+    </header>
+    <div class="v-grid">
+      {% for video in videos %}
+        <article class="v-card reveal" data-video="{{ video.embed_id|default:'' }}" data-src="{{ video.video.url|default:'' }}">
+          <div class="v-media">
+            {% if video.poster %}
+              <img class="v-img" src="{{ video.poster.url }}" alt="{{ video.title }}" loading="lazy">
+            {% else %}
+              <div class="v-img v-img--mono">{{ video.title|slice:":1" }}</div>
+            {% endif %}
+            <button class="v-play" type="button" aria-label="Play {{ video.title }}">▶</button>
+          </div>
+          <h3 class="v-title">{{ video.title }}</h3>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if packages %}
+<section class="section section--pad" id="baby-packages">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">Baby packages</p>
+      <h2 class="section-title">Sweet plans for <em>little stars</em></h2>
+    </header>
+    <div class="pricing-grid">
+      {% for package in packages %}
+        {% include "partials/package_card.html" with package=package %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if offers %}
+<section class="section section--pad section--dark" id="offers">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">Baby offers</p>
+      <h2 class="section-title">Grow with <em>our best prices</em></h2>
+    </header>
+    <div class="offers-grid">
+      {% for offer in offers|slice:":2" %}
+        {% include "partials/offer_card.html" with offer=offer %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% include "partials/cta.html" %}
+
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/portfolio.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Contact &amp; Enquire — {{ site.brand_name }}{% endblock %}
+{% block meta_description %}Check availability and get a personalised quote. Tell us your date, city and budget — photography &amp; videography enquiries answered fast.{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/contact.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="page-hero page-hero--contact">
+  <div class="container">
+    <p class="eyebrow eyebrow--gold reveal">Get in touch</p>
+    <h1 class="page-hero-title reveal">Let's plan <em>your story</em></h1>
+    <p class="page-hero-sub reveal">Share a few details and we'll get back within a few hours.</p>
+  </div>
+</section>
+
+<section class="section section--pad section--contact">
+  <div class="container contact-wrap">
+
+    {% if submitted %}
+      <div class="contact-success" id="successPanel" data-success>
+        <p class="eyebrow eyebrow--gold">Received with love</p>
+        <h2 class="contact-success-title">Thank you! <em>We're on it.</em></h2>
+        <p class="contact-success-text">Your enquiry is safely in our inbox. We'll call you back within a few hours to talk dates, venues and the little details that matter.</p>
+        <div class="contact-success-actions">
+          <a class="btn btn--gold btn--lg" href="{{ wa_message }}" target="_blank" rel="noopener">Continue on WhatsApp</a>
+          <a class="btn btn--ghost btn--lg" href="{% url 'main:contact' %}">Send another enquiry</a>
+        </div>
+      </div>
+    {% else %}
+      <div id="formPanel">
+        <div class="contact-intro reveal">
+          <p class="eyebrow eyebrow--gold">Book your date</p>
+          <h2 class="section-title">Tell us about <em>your day</em></h2>
+          <p class="svc-intro-text">We reply within business hours — usually much faster.</p>
+        </div>
+
+        <form class="enquiry-form" id="enquiryForm" method="post" action="{% url 'main:contact' %}" novalidate>
+          {% csrf_token %}
+          <div class="form-row form-row--2">
+            <div class="form-group">
+              <label for="{{ form.name.id_for_label }}">Full name *</label>
+              {{ form.name }}
+              {{ form.name.errors }}
+            </div>
+            <div class="form-group">
+              <label for="{{ form.phone.id_for_label }}">Phone / WhatsApp *</label>
+              {{ form.phone }}
+              {{ form.phone.errors }}
+            </div>
+          </div>
+
+          <div class="form-row form-row--2">
+            <div class="form-group">
+              <label for="{{ form.email.id_for_label }}">Email</label>
+              {{ form.email }}
+              {{ form.email.errors }}
+            </div>
+            <div class="form-group">
+              <label for="{{ form.city.id_for_label }}">City / nearby cities</label>
+              {{ form.city }}
+              {{ form.city.errors }}
+            </div>
+          </div>
+
+          <div class="form-row form-row--2">
+            <div class="form-group">
+              <label for="{{ form.service.id_for_label }}">Interested service</label>
+              {{ form.service }}
+              {{ form.service.errors }}
+            </div>
+            <div class="form-group">
+              <label for="{{ form.event_date.id_for_label }}">Event date</label>
+              {{ form.event_date }}
+              {{ form.event_date.errors }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.budget.id_for_label }}">Budget range</label>
+            {{ form.budget }}
+            {{ form.budget.errors }}
+          </div>
+
+          <div class="form-group">
+            <label for="{{ form.message.id_for_label }}">Your message</label>
+            {{ form.message }}
+            {{ form.message.errors }}
+          </div>
+
+          <div class="form-group form-group--actions">
+            <button type="submit" class="btn btn--gold btn--lg" id="enquirySubmit">Send Enquiry</button>
+            <p class="form-hint" data-form-hint>We protect your details. No spam, ever.</p>
+          </div>
+        </form>
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+
+<section class="section section--pad section--dark" id="direct">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">Prefer to talk?</p>
+      <h2 class="section-title">Reach us <em>directly</em></h2>
+    </header>
+    <div class="direct-grid">
+      <div class="direct reveal">
+        <h3>Call / WhatsApp</h3>
+        <p><a href="tel:{{ site.phones }}">{{ site.phones }}</a></p>
+      </div>
+      {% if site.email %}
+      <div class="direct reveal">
+        <h3>Email</h3>
+        <p><a href="mailto:{{ site.email }}">{{ site.email }}</a></p>
+      </div>
+      {% endif %}
+      {% if site.address %}
+      <div class="direct reveal">
+        <h3>Studio</h3>
+        <p>{{ site.address }}</p>
+      </div>
+      {% endif %}
+      <div class="direct reveal">
+        <h3>Response time</h3>
+        <p>Usually under 4 hours</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/contact.js' %}"></script>
+{% endblock %}

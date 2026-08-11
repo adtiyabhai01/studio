@@ -1,0 +1,97 @@
+/* =========================================================
+   contact.css — contact & enquiry page styles.
+   ========================================================= */
+
+.page-hero--contact { padding-bottom: clamp(120px, 18vh, 180px); }
+.section--contact { background: var(--bg); padding-top: 40px; }
+
+.contact-wrap { max-width: 860px; }
+
+.contact-intro { margin-bottom: 40px; }
+
+/* ---------- form ---------- */
+
+.enquiry-form { margin-top: 8px; }
+.form-row { display: grid; gap: 22px; }
+.form-row--2 { grid-template-columns: 1fr 1fr; }
+.form-group { margin-bottom: 22px; }
+.form-group label {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-strong);
+  margin-bottom: 10px;
+}
+.field {
+  width: 100%;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  color: var(--ivory);
+  padding: 14px 16px;
+  font-size: 0.98rem;
+  border-radius: 2px;
+  transition: border-color var(--tr), box-shadow var(--tr);
+}
+.field:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(178, 138, 84, 0.16);
+}
+.field::placeholder { color: #6e6557; }
+.field-select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--gold) 50%),
+    linear-gradient(135deg, var(--gold) 50%, transparent 50%);
+  background-position: calc(100% - 22px) 55%, calc(100% - 16px) 55%;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+}
+.field-select option { background: #171412; color: var(--ivory); }
+.field-area { resize: vertical; min-height: 110px; }
+
+.errorlist {
+  margin-top: 8px;
+  color: #e0a3a3;
+  font-size: 0.82rem;
+  list-style: none;
+}
+
+.form-group--actions {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+}
+.form-hint { font-size: 0.82rem; color: var(--muted); }
+
+/* ---------- success panel ---------- */
+
+.contact-success { text-align: center; padding: 40px 0 10px; }
+.contact-success-title { font-size: clamp(1.8rem, 3.4vw, 2.6rem); }
+.contact-success-text { color: var(--muted); max-width: 46ch; margin: 18px auto 0; }
+.contact-success-actions { margin-top: 30px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+/* ---------- direct contact ---------- */
+
+.direct-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 2px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin-top: 8px;
+}
+.direct { background: var(--bg-2); padding: 30px 26px; }
+.direct h3 { color: var(--gold-strong); font-size: 1.05rem; margin-bottom: 10px; }
+.direct p { color: var(--muted); font-size: 0.95rem; }
+.direct a { color: var(--ivory); border-bottom: 1px solid var(--gold); }
+.direct a:hover { color: var(--gold-strong); }
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 640px) {
+  .form-row--2 { grid-template-columns: 1fr; }
+}

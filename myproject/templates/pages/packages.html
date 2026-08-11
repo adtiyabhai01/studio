@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Packages & Pricing — {{ site.brand_name }}{% endblock %}
+{% block meta_description %}Transparent photography & videography packages — Affordable, Classic, Premium and Luxury. Compare coverage, films, albums &  prices. Every package customisable.{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/packages.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="container">
+    <p class="eyebrow eyebrow--gold reveal">Investment</p>
+    <h1 class="page-hero-title reveal">Honest pricing for <em>every celebration</em></h1>
+    <p class="page-hero-sub reveal">Four tiers. No hidden costs. Every package can be built up or trimmed down — the price you see is the starting love.</p>
+  </div>
+</section>
+
+{% for group in groups %}
+<section class="section section--pad {% cycle 'section--alt' '' %}">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">{{ group.label }} collection</p>
+      <h2 class="section-title">{{ group.label }} <em>packages</em></h2>
+    </header>
+    <div class="pricing-grid">
+      {% for package in group.packages %}
+        {% include "partials/package_card.html" with package=package %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% empty %}
+<section class="section section--pad">
+  <div class="container">
+    <p class="empty">Packages will appear here once added from the admin (the CMS).</p>
+  </div>
+</section>
+{% endfor %}
+
+<section class="section section--strip section--dark" id="notes">
+  <div class="container">
+    <div class="notes-grid">
+      <div class="note reveal"><h3>Everything customisable</h3><p>Add an hour, drop an album, swap a photographer for a filmmaker. We tailor to your day.</p></div>
+      <div class="note reveal"><h3>Token booking</h3><p>A small advance confirms your date. Balance anytime before the event.</p></div>
+      <div class="note reveal"><h3>Travel included</h3><p>We cover your city. For destinations, we quote clear travel before you commit.</p></div>
+      <div class="note reveal"><h3>All media on time</h3><p>Sneak-peeks within 48 hours and full delivery on the promised date.</p></div>
+    </div>
+  </div>
+</section>
+
+{% include "partials/cta.html" %}
+
+{% endblock %}

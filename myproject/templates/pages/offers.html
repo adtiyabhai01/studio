@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Special Offers &amp; Combos — {{ site.brand_name }}{% endblock %}
+{% block meta_description %}Limited-time photography & videography offers — Baby + Engagement combo, Classical Wedding combos and more at special prices. Save beautifully on every celebration.{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/offers.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="container">
+    <p class="eyebrow eyebrow--gold reveal">Limited time</p>
+    <h1 class="page-hero-title reveal">Offers that <em>love you back</em></h1>
+    <p class="page-hero-sub reveal">Curated combos at honest savings. Dates are limited each month, so claim early.</p>
+  </div>
+</section>
+
+<section class="section section--pad">
+  <div class="container">
+    <div class="offers-grid offers-grid--stack">
+      {% for offer in offers %}
+        {% include "partials/offer_card.html" with offer=offer %}
+      {% empty %}
+        <p class="empty">New offers will appear here soon after being added from the admin.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% include "partials/cta.html" %}
+
+{% endblock %}

@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ site.brand_name }} — Wedding, Pre-Wedding, Maternity & Baby Photography{% endblock %}
+{% block meta_description %}A premium photography & videography studio crafting cinematic wedding, pre-wedding, engagement, maternity and baby stories in every city. Check availability today.{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="hero" id="home-hero">
+  <div class="hero-media">
+    {% if hero_videos %}
+      {% if hero_videos.0.video %}
+        <video class="hero-video" autoplay muted loop playsinline preload="none"
+               poster="{% if hero_videos.0.poster %}{{ hero_videos.0.poster.url }}{% endif %}">
+          <source src="{{ hero_videos.0.video.url }}" type="video/{% if hero_videos.0.video.url|slice:'-4:' == '.mov' %}mp4{% else %}mp4{% endif %}">
+        </video>
+      {% endif %}
+    {% endif %}
+    {% if hero_fallback %}
+      <img class="hero-img" src="{{ hero_fallback.url }}" alt="{{ hero_title }}" fetchpriority="high">
+    {% elif not hero_videos %}
+      <div class="hero-img hero-img--gradient" role="presentation"></div>
+    {% endif %}
+  </div>
+  <div class="hero-shade"></div>
+
+  <div class="container hero-content">
+    <p class="hero-eyebrow reveal">Award-winning Foto & Film Studio · Serving {{ featured_cities|length|default:0 }} cities</p>
+    <h1 class="hero-title reveal">{{ hero_title|default:site.home_hero_title }}</h1>
+    <p class="hero-sub reveal">{{ hero_subtitle|default:site.home_hero_subtitle }}</p>
+    <div class="hero-actions reveal">
+      <a href="{% url 'main:portfolio' %}" class="btn btn--gold btn--lg">View Portfolio</a>
+      <a href="{% url 'main:contact' %}" class="btn btn--ghost btn--lg">Enquire Now</a>
+    </div>
+    <div class="hero-scroll" aria-hidden="true"><span></span></div>
+  </div>
+</section>
+
+{% if featured_services %}
+<section class="section section--pad" id="services">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">What we do</p>
+      <h2 class="section-title">Crafted for every chapter <em>of your story</em></h2>
+      <p class="section-sub">From the first hand-holding to the first breath of your little one — we document life's most cinematic moments.</p>
+    </header>
+    <div class="services-scroll">
+      <div class="services-track">
+        {% for service in featured_services %}
+          {% include "partials/service_card.html" with service=service %}
+        {% endfor %}
+        {% if not featured_services|length|divisibleby:2 %}
+          <div class="service-card service-card--ghost" aria-hidden="true"></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if stories %}
+<section class="section section--strip" id="stories">
+  <div class="container">
+    <header class="section-head section-head--justify reveal">
+      <div>
+        <p class="eyebrow eyebrow--gold">Signature weddings</p>
+        <h2 class="section-title">Stories we had the <em>honour</em> to tell</h2>
+      </div>
+      <a href="{% url 'main:portfolio' %}" class="btn btn--ghost btn--sm">Full portfolio <span aria-hidden="true">→</span></a>
+    </header>
+    <div class="stories-strip">
+    {% for image in stories|slice:":6" %}
+      <figure class="story">
+        <div class="story-imgbox">
+          <img src="{{ image.image.url }}" alt="{{ image.get_alt }}" loading="lazy">
+        </div>
+        <figcaption class="story-cap">{{ image.category.name|default:"" }}{% if image.title %} · {{ image.title }}{% endif %}</figcaption>
+      </figure>
+    {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if stats %}
+<section class="section stats reveal" id="stats">
+  <div class="container stats-grid" >
+    <div class="stat"><span class="stat-num" data-count="{{ stats.years }}">0</span><span class="stat-label">Years of craft</span></div>
+    <div class="stat"><span class="stat-num" data-count="{{ stats.events }}">0</span><span class="stat-label">Events filmed</span></div>
+    <div class="stat"><span class="stat-num" data-count="{{ stats.clients }}">0</span><span class="stat-label">Happy families</span></div>
+    <div class="stat"><span class="stat-num" data-count="{{ stats.cities }}">0</span><span class="stat-label">Cities & beyond</span></div>
+  </div>
+</section>
+{% endif %}
+
+{% if offers %}
+<section class="section section--pad section--dark" id="offers">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">Season offers</p>
+      <h2 class="section-title">Current <em>offers</em></h2>
+      <p class="section-sub">Limited dates · Book early to save your city's date.</p>
+    </header>
+    <div class="offers-grid">
+      {% for offer in offers %}
+        {% include "partials/offer_card.html" with offer=offer %}
+      {% endfor %}
+    </div>
+    <div class="section-more reveal">
+      <a href="{% url 'main:offers' %}" class="btn btn--ghost">View all offers <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if packages %}
+<section class="section section--pad" id="pricing">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">Investment</p>
+      <h2 class="section-title">Popular <em>packages</em></h2>
+      <p class="section-sub">Transparent pricing for every celebration. Every package is fully customisable.</p>
+    </header>
+    <div class="pricing-grid">
+      {% for package in packages %}
+        {% include "partials/package_card.html" with package=package %}
+      {% endfor %}
+    </div>
+    <div class="section-more reveal">
+      <a href="{% url 'main:packages' %}" class="btn btn--ghost">See all packages <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if cities %}
+<section class="section section--cities section--strip" id="cities">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">Everywhere love is</p>
+      <h2 class="section-title">Shooting across <em>cities</em></h2>
+      <p class="section-sub">No venue too far. We travel with all the gear your story needs.</p>
+    </header>
+    <ul class="cities-list reveal">
+      {% for city in featured_cities %}
+        <li class="cities-list-item">{{ city.name }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endif %}
+
+{% if testimonials %}
+<section class="section section--pad section--dark" id="words">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">Kind words</p>
+      <h2 class="section-title">Families <em>we've</em> served</h2>
+    </header>
+    <div class="t-slider reveal" data-slider>
+      <div class="t-track" data-slider-track>
+        {% for testimonial in testimonials %}
+          <div class="t-slide">{% include "partials/testimonial_card.html" with testimonial=testimonial %}</div>
+        {% endfor %}
+      </div>
+      <div class="t-dots">
+        {% for testimonial in testimonials %}
+          <button class="t-dot" data-dot="{{ forloop.counter0 }}" aria-label="Slide {{ forloop.counter }}"></button>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% include "partials/cta.html" %}
+
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/home.js' %}"></script>
+{% endblock %}

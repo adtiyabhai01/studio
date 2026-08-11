@@ -1,0 +1,45 @@
+<article class="package-card {% if package.is_featured %}package-card--featured{% endif %} reveal">
+  {% if package.discount_percent %}
+    <span class="package-badge">Save {{ package.discount_percent }}%</span>
+  {% endif %}
+  <header class="package-card-head">
+    <p class="package-card-tier">{{ package.get_category_display }}</p>
+    <h3 class="package-card-name">{{ package.name }}</h3>
+  </header>
+
+  <div class="package-card-price">
+    {% if package.old_price %}
+      <span class="package-card-old">₹{{ package.old_price }}</span>
+    {% endif %}
+    <span class="package-card-now">₹{{ package.price }}</span>
+    <span class="package-card-note">starting price · on request</span>
+  </div>
+
+  {% if package.description %}
+    <p class="package-card-desc">{{ package.description }}</p>
+  {% endif %}
+
+  <ul class="package-card-list">
+    {% if package.photographers %}<li>{{ package.photographers }} Photographer{% if package.photographers > 1 %}s{% endif %}</li>{% endif %}
+    {% if package.videographers %}<li>{{ package.videographers }} Cinematographer{% if package.videographers > 1 %}s{% endif %}</li>{% endif %}
+    {% if package.hours %}<li>Up to {{ package.hours }} hours coverage</li>{% endif %}
+    {% if package.edited_photos %}<li>{{ package.edited_photos }}+ edited photos</li>{% endif %}
+    {% if package.reels %}<li>{{ package.reels }} highlight reel{% if package.reels > 1 %}s{% endif %}</li>{% endif %}
+    {% if package.cinematic_film %}<li>Cinematic film</li>{% endif %}
+    {% if package.same_day_edit %}<li>Same-day edit</li>{% endif %}
+    {% if package.full_day_coverage %}<li>Full-day coverage</li>{% endif %}
+    {% if package.album %}<li>Premium album</li>{% endif %}
+    {% if package.drone %}<li>Drone coverage</li>{% endif %}
+    {% for feature in package.features.all %}
+      <li>{{ feature.label }}{% if feature.value %} — {{ feature.value }}{% endif %}</li>
+    {% endfor %}
+  </ul>
+
+  {% if package.deliverables %}
+    <p class="package-card-deliver">{{ package.deliverables }}</p>
+  {% endif %}
+
+  <a class="btn btn--ghost btn--block" href="{% url 'main:contact' %}?package={{ package.name|urlencode }}">
+    Enquire Now
+  </a>
+</article>

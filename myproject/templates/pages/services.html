@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Services — {{ site.brand_name }}{% endblock %}
+{% block meta_description %}Wedding photography, wedding videography, pre-wedding, engagement, couple, maternity and baby shoots — every service crafted with a cinematic eye.{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/services.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="container">
+    <p class="eyebrow eyebrow--gold reveal">Our services</p>
+    <h1 class="page-hero-title reveal">We tell every kind of <em>love story</em></h1>
+    <p class="page-hero-sub reveal">Seven crafts. One obsession — moments that feel alive when you watch them years later.</p>
+  </div>
+</section>
+
+<section class="section section--pad">
+  <div class="container">
+    <div class="services-grid">
+      {% for service in services %}
+        {% include "partials/service_card.html" with service=service %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section--strip section--dark" id="workflow">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">How it works</p>
+      <h2 class="section-title">From hello to <em>forever</em></h2>
+    </header>
+    <ol class="workflow">
+      <li class="wf reveal"><span class="wf-num">01</span><h3>Enquire</h3><p>Share your date, city and vision. We reply within hours.</p></li>
+      <li class="wf reveal"><span class="wf-num">02</span><h3>Connect</h3><p>A friendly call to understand your celebration and budget.</p></li>
+      <li class="wf reveal"><span class="wf-num">03</span><h3>Book</h3><p>Lock your date with a small token. Nothing leftover to worry about.</p></li>
+      <li class="wf reveal"><span class="wf-num">04</span><h3>Relive</h3><p>Receive your gallery and film — then watch your family cry. Beautifully.</p></li>
+    </ol>
+  </div>
+</section>
+
+{% include "partials/cta.html" %}
+
+{% endblock %}

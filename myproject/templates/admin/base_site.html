@@ -1,0 +1,31 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | Studio Admin{% endblock %}
+
+{% block branding %}
+<div id="site-name">
+  <a href="{% url 'admin:index' %}">{{ site.brand_name|default:"Studio" }} · Admin</a>
+</div>
+{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+  <style>
+    :root {
+      --admin-accent: #b08d57;
+      --admin-accent-dark: #171513;
+    }
+    #header { background: var(--admin-accent-dark); }
+    #branding h1 a { letter-spacing: .04em; text-transform: uppercase; font-size: .95rem; }
+    .module h2, .module caption { background: #24211e; }
+    .enquiry-new td { font-weight: 600; }
+    td > a { color: #9a732f; }
+  </style>
+{% endblock %}
+
+{% block footer %}
+  {{ block.super }}
+  <script src="{% static 'js/admin.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,41 @@
+/* =========================================================
+   services.css — services index page styles.
+   ========================================================= */
+
+#services { background: var(--bg); }
+
+/* ---------- services grid ---------- */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 34px;
+}
+
+/* ---------- workflow ---------- */
+
+.workflow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  counter-reset: wf;
+}
+.wf { background: var(--bg-2); padding: 34px 30px; }
+.wf-num {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+}
+.wf h3 { margin-top: 18px; font-size: 1.25rem; color: var(--gold-strong); }
+.wf p { margin-top: 10px; color: var(--muted); font-size: 0.93rem; }
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 860px) {
+  .workflow { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px) {
+  .workflow { grid-template-columns: 1fr; }
+}

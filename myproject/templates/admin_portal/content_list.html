@@ -1,0 +1,69 @@
+{% extends "admin_portal/base.html" %}
+{% block title %}{{ section.name }} · Admin Portal{% endblock %}
+{% block head_actions %}
+  <a class="btn btn--gold btn--sm" href="{% url 'main:portal_content_add' section.key %}">+ Add New</a>
+{% endblock %}
+{% block content %}
+  <div class="ap-cm-toolbar">
+    {% if section.search_fields %}
+      <form class="ap-cm-search" method="get" action="">
+        <input class="field ap-search" type="search" name="q" value="{{ query }}"
+               placeholder="Search {{ section.name|lower }}…" aria-label="Search {{ section.name }}">
+        <button class="btn btn--gold btn--sm" type="submit">Search</button>
+        {% if query %}<a class="ap-cm-clear" href="{% url 'main:portal_content_list' section.key %}">Clear</a>{% endif %}
+      </form>
+    {% endif %}
+  </div>
+
+  {% if rows %}
+    <div class="ap-table-wrap">
+      <table class="ap-table">
+        <thead>
+          <tr>
+            {% for col in section.list_display %}<th>{{ col.label }}</th>{% endfor %}
+            <th class="ap-cm-actions-th">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              {% for cell in row.cells %}
+                <td>{% if cell.html %}{{ cell.value|safe }}{% else %}{{ cell.value }}{% endif %}</td>
+              {% endfor %}
+              <td class="ap-cm-actions">
+                <a class="ap-cm-edit" href="{% url 'main:portal_content_edit' section.key row.pk %}">Edit</a>
+                <a class="ap-cm-del" href="{% url 'main:portal_content_delete' section.key row.pk %}">Delete</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+      <div class="ap-cm-pager">
+        {% if page_obj.has_previous %}
+          <a class="ap-cm-page" href="?{% if query %}q={{ query|urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">← Prev</a>
+        {% else %}
+          <span class="ap-cm-page is-disabled">← Prev</span>
+        {% endif %}
+        <span class="ap-cm-pageinfo">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a class="ap-cm-page" href="?{% if query %}q={{ query|urlencode }}&{% endif %}page={{ page_obj.next_page_number }}">Next →</a>
+        {% else %}
+          <span class="ap-cm-page is-disabled">Next →</span>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="ap-cm-empty">
+      {% if query %}
+        <p>No {{ section.name|lower }} match “{{ query }}”.</p>
+        <a class="btn btn--ghost btn--sm" href="{% url 'main:portal_content_list' section.key %}">Clear search</a>
+      {% else %}
+        <p>No {{ section.name|lower }} yet.</p>
+        <a class="btn btn--gold btn--sm" href="{% url 'main:portal_content_add' section.key %}">Add your first {{ section.singular|lower }}</a>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endblock %}

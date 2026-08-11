@@ -1,0 +1,34 @@
+<article class="offer-card {% if offer.is_featured %}offer-card--featured{% endif %} reveal">
+  {% if offer.image %}
+    <div class="offer-card-media">
+      <img src="{{ offer.image.url }}" alt="{{ offer.title }}" loading="lazy">
+    </div>
+  {% endif %}
+  <div class="offer-card-body">
+    <p class="eyebrow eyebrow--gold">Limited Offer</p>
+    <h3 class="offer-card-title">{{ offer.title }}</h3>
+    <p class="offer-card-desc">{{ offer.description }}</p>
+
+    {% if offer.included_list %}
+      <ul class="offer-card-list">
+        {% for item in offer.included_list %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <div class="offer-card-price">
+      <span class="offer-card-old">₹{{ offer.original_price }}</span>
+      <span class="offer-card-now">₹{{ offer.offer_price }}</span>
+    </div>
+
+    {% if offer.end_date %}
+      <p class="offer-card-date">Valid until {{ offer.end_date|date:"d M Y" }}</p>
+    {% endif %}
+
+    <div class="offer-card-actions">
+      <a class="btn btn--gold btn--sm" href="{% url 'main:contact' %}?offer={{ offer.title|urlencode }}">Claim This Offer</a>
+      <a class="offer-card-wa" href="{{ wa_message }}" target="_blank" rel="noopener">Ask on WhatsApp</a>
+    </div>
+  </div>
+</article>

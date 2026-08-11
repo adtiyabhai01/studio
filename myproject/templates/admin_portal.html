@@ -1,0 +1,369 @@
+{% load static %}
+{% load portal_extras %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal — {{ site.brand_name }}</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Marcellus&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Manrope:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600&family=Inter:wght@300;400;500;600&family=Jost:wght@300;400;500;600&family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  {% include "partials/theme_vars.html" %}
+  <link rel="stylesheet" href="{% static 'css/admin_portal.css' %}">
+</head>
+<body class="ap-body">
+
+{% if not portal_user.is_authenticated %}
+
+  <!-- ================= LOGIN ================= -->
+  <section class="ap-login">
+    <div class="ap-login-card">
+      <div class="ap-badge">
+        <svg class="ap-ring" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="ap-ring-track" cx="60" cy="60" r="52"></circle>
+          <circle class="ap-ring-bar" cx="60" cy="60" r="52"></circle>
+        </svg>
+        <span class="ap-mark">
+          {% if site.logo %}
+            <img class="ap-logo" src="{{ site.logo.url }}" alt="{{ site.brand_name }}">
+          {% else %}
+            {{ site.brand_name|slice:":1" }}
+          {% endif %}
+        </span>
+      </div>
+      <p class="ap-login-eyebrow">Studio Control Room</p>
+      <h1 class="ap-login-title">Admin <em>Portal</em></h1>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="ap-flash ap-flash--{{ message.tags|default:'info' }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      {% if login_error %}
+        <div class="ap-flash ap-flash--error">Invalid username or password. Please try again.</div>
+      {% endif %}
+
+      <form class="ap-login-form" method="post" action="{% url 'main:admin_portal' %}" autocomplete="off">
+        {% csrf_token %}
+        <input type="hidden" name="portal_action" value="login">
+        <div class="ap-field">
+          <label for="id_username">Username</label>
+          <input class="field" type="text" id="id_username" name="username"
+                 value="{{ login_username|default:'' }}" placeholder="admin" required autofocus>
+        </div>
+        <div class="ap-field">
+          <label for="id_password">Password</label>
+          <input class="field" type="password" id="id_password" name="password"
+                 placeholder="••••" required>
+        </div>
+        <button class="btn btn--gold btn--block" type="submit">Sign In</button>
+      </form>
+
+      <p class="ap-login-note">Managed by the studio team · Restricted access</p>
+    </div>
+  </section>
+
+{% else %}
+
+  <!-- ================= DASHBOARD ================= -->
+  <header class="ap-top">
+    <div class="ap-top-inner">
+      <a class="ap-brand" href="{% url 'main:admin_portal' %}">
+        <span class="ap-brand-mark">{{ site.brand_name|slice:":1" }}</span>
+        <span class="ap-brand-text">{{ site.brand_name }} <em>Admin</em></span>
+      </a>
+      <nav class="ap-top-nav">
+        <a href="/" target="_blank">View Site</a>
+        <a href="/admin/">Django CMS</a>
+        <a href="{% url 'main:admin_portal_logout' %}" class="ap-logout">Sign Out</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="ap-main container">
+
+    <div class="ap-hello">
+      <div>
+        <p class="eyebrow eyebrow--gold">Welcome back</p>
+        <h1 class="ap-h1">Studio <em>Overview</em></h1>
+      </div>
+      <a class="btn btn--gold btn--sm" href="{% url 'main:admin_portal' %}?tab=enquiries">Manage New Enquiries</a>
+    </div>
+
+    <!-- stats -->
+    <section class="ap-stats">
+      <div class="ap-stat"><span class="ap-stat-num">{{ stats.enquiries_new }}</span><span class="ap-stat-label">New enquiries</span></div>
+      <div class="ap-stat"><span class="ap-stat-num">{{ stats.enquiries_total }}</span><span class="ap-stat-label">Total enquiries</span></div>
+      <div class="ap-stat"><span class="ap-stat-num">{{ stats.services }}</span><span class="ap-stat-label">Services</span></div>
+      <div class="ap-stat"><span class="ap-stat-num">{{ stats.packages }}</span><span class="ap-stat-label">Packages</span></div>
+      <div class="ap-stat"><span class="ap-stat-num">{{ stats.photos }}</span><span class="ap-stat-label">Photos</span></div>
+      <div class="ap-stat"><span class="ap-stat-num">{{ stats.videos }}</span><span class="ap-stat-label">Videos</span></div>
+    </section>
+
+    <!-- tabs -->
+    <nav class="ap-tabs">
+      <button class="ap-tab is-active" data-tab="enquiries">Enquiries</button>
+      <button class="ap-tab" data-tab="manage">Manage Content</button>
+      <button class="ap-tab" data-tab="site">Site Health</button>
+      <button class="ap-tab" data-tab="theme">Theme</button>
+    </nav>
+
+    <!-- tab: enquiries -->
+    <section class="ap-panel is-active" id="tab-enquiries" data-panel="enquiries">
+      <div class="ap-panel-head">
+        <div>
+          <h2 class="ap-panel-title">Recent enquiries</h2>
+          <p class="ap-panel-sub">Latest {{ recent_enquiries|length }} submissions · search by name, phone or city.</p>
+        </div>
+        <input class="field ap-search" id="apSearch" type="search" placeholder="Search enquiries…" aria-label="Search enquiries">
+      </div>
+
+      {% if recent_enquiries %}
+        <div class="ap-table-wrap">
+          <table class="ap-table" id="apTable">
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Service</th>
+                <th>Date · City</th>
+                <th>Budget</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for enquiry in recent_enquiries %}
+                <tr class="ap-row" data-query="{{ enquiry.name|lower }} {{ enquiry.phone }} {{ enquiry.city|lower }} {{ enquiry.service.name|default:''|lower }}">
+                  <td>
+                    <strong>{{ enquiry.name }}</strong>
+                    <span class="ap-cell-sub">{{ enquiry.phone }}{% if enquiry.email %} · {{ enquiry.email }}{% endif %}</span>
+                  </td>
+                  <td>{{ enquiry.service.name|default:"—" }}</td>
+                  <td>
+                    {% if enquiry.event_date %}{{ enquiry.event_date|date:"d M Y" }}{% endif %}
+                    <span class="ap-cell-sub">{{ enquiry.city|default:"" }}</span>
+                  </td>
+                  <td>
+                    <a class="ap-manage-link" href="/admin/myapp/enquiry/{{ enquiry.pk }}/change/" title="Open in CMS">
+                      {{ budget_map|dict_get:enquiry.budget }}
+                    </a>
+                  </td>
+                  <td>
+                    <select class="ap-status {% status_class enquiry.status %}"
+                            data-url="{% url 'main:admin_portal' %}"
+                            data-csrf="{{ csrf_token }}"
+                            data-id="{{ enquiry.pk }}"
+                            name="status">
+                      {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if enquiry.status == value %}selected{% endif %}>● {{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="ap-empty">No enquiries yet — they'll appear here the moment a visitor submits the contact form.</p>
+      {% endif %}
+    </section>
+
+    <!-- tab: manage -->
+    <section class="ap-panel" id="panel-manage" data-panel="manage" hidden>
+      <div class="ap-panel-head">
+        <div>
+          <h2 class="ap-panel-title">Manage content</h2>
+          <p class="ap-panel-sub">Open any section below to add, edit and manage it right here in the portal.</p>
+        </div>
+      </div>
+
+      <div class="ap-grid" id="apTiles">
+        {% for link in portal_links %}
+          <div class="ap-tile-wrap">
+            <a class="ap-tile" href="{% url 'main:portal_content_list' link.key %}">
+              <span class="ap-tile-side">
+                <span class="ap-tile-name">{{ link.name }}</span>
+                <span class="ap-tile-desc">{{ link.desc }}</span>
+              </span>
+              <span class="ap-tile-actions">
+                <span>Manage</span>
+                <span class="ap-tile-go" aria-hidden="true">→</span>
+              </span>
+            </a>
+            <a class="ap-tile-add" href="{% url 'main:portal_content_add' link.key %}"
+               title="Add new {{ link.name|lower }}">+</a>
+          </div>
+        {% endfor %}
+      </div>
+
+      <p class="ap-panel-foot">
+        Add, view and edit your content right here in a clean editor — no need to open the CMS.
+        All media (photos, videos, posters) is stored under <code>/media/</code>, and advanced
+        filtering &amp; search is still available in the
+        <a href="/admin/myapp/" target="_blank" rel="noopener">full Django admin</a>.
+      </p>
+    </section>
+
+    <!-- tab: site health -->
+    <section class="ap-panel" id="panel-site" data-panel="site" hidden>
+      <div class="ap-panel-head">
+        <div>
+          <h2 class="ap-panel-title">Site health</h2>
+          <p class="ap-panel-sub">Quick snapshot of what's live and what needs attention.</p>
+        </div>
+      </div>
+      <div class="ap-health">
+        <div class="ap-health-row"><span>Active offers</span><span class="ap-dot {% if stats.offers %}ap-dot--green{% else %}ap-dot--grey{% endif %}">{{ stats.offers }} published</span></div>
+        <div class="ap-health-row"><span>Portfolio photos live</span><span class="ap-dot {% if stats.photos %}ap-dot--green{% else %}ap-dot--grey{% endif %}">{{ stats.photos }}</span></div>
+        <div class="ap-health-row"><span>Cities served</span><span class="ap-dot ap-dot--green">{{ stats.cities }}</span></div>
+        <div class="ap-health-row"><span>Enquiries awaiting response</span><span class="ap-dot {% if stats.enquiries_new %}ap-dot--gold{% else %}ap-dot--green{% endif %}">{{ stats.enquiries_new }} new</span></div>
+      </div>
+      <div class="ap-quick">
+        <h3 class="ap-quick-title">Make it live</h3>
+        <div class="ap-quick-row">
+          <a class="btn btn--ghost btn--sm" href="{% url 'main:portal_content_add' 'portfolio-photos' %}">Upload photos</a>
+          <a class="btn btn--ghost btn--sm" href="{% url 'main:portal_content_add' 'offers' %}">Create an offer</a>
+          <a class="btn btn--ghost btn--sm" href="{% url 'main:portal_content_edit' 'site-settings' 1 %}">Edit site copy</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- tab: theme -->
+    <section class="ap-panel" id="panel-theme" data-panel="theme" hidden>
+      <div class="ap-panel-head">
+        <div>
+          <h2 class="ap-panel-title">Theme settings</h2>
+          <p class="ap-panel-sub">Change the site colours, fonts and layout — the preview updates live, save to publish.</p>
+        </div>
+        <span class="ap-theme-state {% if theme.is_custom %}ap-theme-state--on{% else %}ap-theme-state--off{% endif %}"
+              id="apThemeState">Custom theme {% if theme.is_custom %}ON{% else %}OFF{% endif %}</span>
+      </div>
+
+      <form class="ap-theme-form" method="post" action="{% url 'main:admin_portal' %}" id="apThemeForm">
+        {% csrf_token %}
+        <input type="hidden" name="portal_action" value="theme">
+
+        <div class="ap-theme-presets">
+          <h3 class="ap-theme-group-title">Ready-made themes</h3>
+          <p class="ap-presets-sub">Pick a professionally designed palette — it applies instantly and saves automatically.</p>
+          <div class="ap-preset-grid">
+            {% for preset in theme_presets %}
+              <button type="button" class="ap-preset" data-preset="{{ preset.key }}"
+                      data-colors='{{ preset.colors_json }}'
+                      data-heading="{{ preset.heading }}"
+                      data-body="{{ preset.body }}"
+                      {% if preset.key == current_preset %}data-current="1"{% endif %}>
+                <span class="ap-preset-swatches">
+                  {% for sw in preset.swatches %}
+                    <span class="ap-preset-dot" style="background:{{ sw }}"></span>
+                  {% endfor %}
+                </span>
+                <span class="ap-preset-name">{{ preset.name }}</span>
+                <span class="ap-preset-desc">{{ preset.description }}</span>
+              </button>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="ap-theme-switch">
+          <label class="ap-switch">
+            <input type="checkbox" name="is_custom" id="apThemeToggle" {% if theme.is_custom %}checked{% endif %}>
+            <span class="ap-switch-track"></span>
+          </label>
+          <span>Apply custom theme to the website</span>
+        </div>
+
+        <div class="ap-theme-group">
+          <h3 class="ap-theme-group-title">Brand accent</h3>
+          <div class="ap-swatches">
+            {% for item in theme_color_fields %}
+              {% if item.key == "primary" or item.key == "primary_strong" or item.key == "primary_deep" %}
+                <label class="ap-swatch">
+                  <input class="ap-color" type="color" name="{{ item.key }}" value="{{ theme|attr:item.key }}">
+                  <span class="ap-swatch-name">{{ item.label }}</span>
+                </label>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="ap-theme-group">
+          <h3 class="ap-theme-group-title">Backgrounds</h3>
+          <div class="ap-swatches">
+            {% for item in theme_color_fields %}
+              {% if item.key == "background" or item.key == "background_secondary" or item.key == "cream" %}
+                <label class="ap-swatch">
+                  <input class="ap-color" type="color" name="{{ item.key }}" value="{{ theme|attr:item.key }}">
+                  <span class="ap-swatch-name">{{ item.label }}</span>
+                </label>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="ap-theme-group">
+          <h3 class="ap-theme-group-title">Text &amp; surfaces</h3>
+          <div class="ap-swatches">
+            {% for item in theme_color_fields %}
+              {% if item.key == "ivory" or item.key == "ivory_secondary" or item.key == "ink" or item.key == "ink_secondary" or item.key == "muted" or item.key == "muted_secondary" %}
+                <label class="ap-swatch">
+                  <input class="ap-color" type="color" name="{{ item.key }}" value="{{ theme|attr:item.key }}">
+                  <span class="ap-swatch-name">{{ item.label }}</span>
+                </label>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="ap-theme-group ap-theme-group--wide">
+          <h3 class="ap-theme-group-title">Typography &amp; layout</h3>
+          <div class="ap-theme-row">
+            <label class="ap-theme-select">
+              <span>Heading font</span>
+              <select class="field" name="heading_font">
+                {% for value, label in heading_fonts %}
+                  <option value="{{ value }}" {% if theme.heading_font == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label class="ap-theme-select">
+              <span>Body font</span>
+              <select class="field" name="body_font">
+                {% for value, label in body_fonts %}
+                  <option value="{{ value }}" {% if theme.body_font == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label class="ap-theme-select ap-theme-select--num">
+              <span>Max content width (px)</span>
+              <input class="field" type="number" name="container_width" min="900" max="2000"
+                     value="{{ theme.container_width }}">
+            </label>
+          </div>
+        </div>
+
+        <div class="ap-theme-actions">
+          <button class="btn btn--gold" type="submit">Save Theme</button>
+          <button class="btn btn--ghost" type="submit" name="reset_theme" value="1"
+                  onclick="return confirm('Reset all theme settings to the defaults?')">Reset to Defaults</button>
+          <a class="ap-theme-cancel" href="/" target="_blank">Preview site ↗</a>
+        </div>
+      </form>
+    </section>
+
+  </main>
+
+  <footer class="ap-foot">
+    <p>© {% now "Y" %} {{ site.brand_name }} — Admin Portal. Built on Django.</p>
+    <p><a href="{% url 'main:admin_portal_logout' %}" class="ap-foot-link">Sign out</a></p>
+  </footer>
+
+{% endif %}
+
+  <script src="{% static 'js/admin_portal.js' %}"></script>
+</body>
+</html>

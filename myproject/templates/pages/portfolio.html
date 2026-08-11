@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Portfolio — {{ site.brand_name }}{% endblock %}
+{% block meta_description %}Explore our portfolio of weddings, pre-weddings, engagements, couples, babies and maternity sessions. Every frame a story, every film a memory.{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="container">
+    <p class="eyebrow eyebrow--gold reveal">The portfolio</p>
+    <h1 class="page-hero-title reveal">A gallery of <em>forever</em></h1>
+    <p class="page-hero-sub reveal">Every frame below is a real story we were trusted to tell.</p>
+  </div>
+</section>
+
+<section class="section section--pad section--flow" id="portfolio">
+  <div class="container">
+    <div class="filterbar reveal" id="portfolioFilter">
+      <button class="filter filter--active" data-filter="all">All</button>
+      {% for category in categories %}
+        <button class="filter" data-filter="{{ category.slug }}">{{ category.name }}</button>
+      {% endfor %}
+    </div>
+
+    <div class="portfolio-grid" id="portfolioGrid" data-count="{{ count }}">
+      {% for image in images %}
+        {% include "partials/gallery_item.html" with image=image %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% if videos %}
+<section class="section section--pad section--dark">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">Moving pictures</p>
+      <h2 class="section-title">Films from <em>our desk</em></h2>
+    </header>
+    <div class="v-grid">
+      {% for video in videos %}
+        <article class="v-card reveal" data-video="{{ video.embed_id|default:'' }}" data-src="{{ video.video.url|default:'' }}">
+          <div class="v-media">
+            {% if video.poster %}
+              <img class="v-img" src="{{ video.poster.url }}" alt="{{ video.title }}" loading="lazy">
+            {% else %}
+              <div class="v-img v-img--mono">{{ video.title|slice:":1" }}</div>
+            {% endif %}
+            <button class="v-play" type="button" aria-label="Play {{ video.title }}">Play</button>
+          </div>
+          <h3 class="v-title">{{ video.title }}</h3>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% include "partials/cta.html" %}
+
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/portfolio.js' %}"></script>
+{% endblock %}

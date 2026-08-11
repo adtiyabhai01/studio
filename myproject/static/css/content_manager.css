@@ -1,0 +1,285 @@
+/* =========================================================
+   content_manager.css — frontend content editor pages
+   (view / add / edit / delete inside the admin portal)
+   ========================================================= */
+
+/* ---------- page head ---------- */
+.ap-cm-head {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 26px;
+}
+.ap-cm-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 9px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 9px;
+  transition: color var(--tr), border-color var(--tr), transform var(--tr);
+  white-space: nowrap;
+}
+.ap-cm-back:hover { color: var(--ivory); border-color: var(--gold); transform: translateX(-2px); }
+.ap-cm-back-arrow { color: var(--gold-strong); }
+.ap-cm-title { flex: 1; min-width: 220px; }
+.ap-cm-title .ap-h1 { margin-bottom: 4px; }
+
+.ap-cm-flashes { margin-bottom: 20px; }
+.ap-cm-flashes .ap-flash { margin-bottom: 8px; }
+
+/* ---------- toolbar / search ---------- */
+.ap-cm-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.ap-cm-search { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ap-cm-search .ap-search { width: min(340px, 60vw); }
+.ap-cm-clear { font-size: 0.8rem; color: var(--muted); }
+.ap-cm-clear:hover { color: var(--gold-strong); text-decoration: underline; }
+
+/* ---------- list table extras ---------- */
+.ap-thumb {
+  width: 68px;
+  height: 46px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+  border: 1px solid var(--line-soft);
+  background: #16130f;
+}
+.ap-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.ap-badge.is-on { border-color: rgba(74, 144, 116, 0.7); color: #bce5d6; }
+.ap-badge.is-off { border-color: rgba(150, 145, 135, 0.5); color: var(--muted-2); }
+
+.ap-cm-actions-th { text-align: right; }
+.ap-cm-actions { white-space: nowrap; text-align: right; }
+.ap-cm-edit {
+  font-size: 0.8rem;
+  color: var(--gold-strong);
+  padding: 6px 12px;
+  border: 1px solid rgba(178, 138, 84, 0.5);
+  border-radius: 8px;
+  margin-right: 6px;
+  transition: background var(--tr), color var(--tr);
+}
+.ap-cm-edit:hover { background: var(--gold); color: #171210; }
+.ap-cm-del {
+  font-size: 0.8rem;
+  color: #e0b3a8;
+  padding: 6px 12px;
+  border: 1px solid rgba(190, 90, 70, 0.5);
+  border-radius: 8px;
+  transition: background var(--tr), color var(--tr);
+}
+.ap-cm-del:hover { background: rgba(190, 90, 70, 0.25); color: #f2d4cc; }
+
+/* ---------- pagination ---------- */
+.ap-cm-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+.ap-cm-page {
+  font-size: 0.8rem;
+  color: var(--ivory);
+  padding: 8px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 9px;
+  transition: border-color var(--tr), color var(--tr);
+}
+.ap-cm-page:hover { border-color: var(--gold); color: var(--gold-strong); }
+.ap-cm-page.is-disabled { color: var(--muted-2); opacity: 0.5; pointer-events: none; }
+.ap-cm-pageinfo { font-size: 0.82rem; color: var(--muted); }
+
+/* ---------- empty state ---------- */
+.ap-cm-empty {
+  padding: 46px 30px;
+  text-align: center;
+  color: var(--muted-2);
+  border: 1px dashed var(--line-soft);
+  border-radius: 16px;
+}
+.ap-cm-empty p { margin-bottom: 18px; }
+
+/* ---------- form ---------- */
+.ap-cm-form {
+  background: linear-gradient(180deg, var(--bg-2), #12100e);
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  padding: 28px 30px;
+  max-width: 860px;
+  animation: ap-fade 0.4s var(--ease);
+}
+.ap-cm-form .ap-flash { margin-bottom: 20px; }
+
+.ap-mfield { margin-bottom: 20px; }
+.ap-mfield > label {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.ap-req { color: #e0b3a8; font-style: normal; margin-left: 2px; }
+
+.ap-mfield .field {
+  width: 100%;
+  background: #16130f;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--ivory);
+  font-size: 0.92rem;
+  font-family: var(--sans);
+}
+.ap-mfield .field:focus {
+  outline: none;
+  border-color: var(--gold-strong);
+  box-shadow: 0 0 0 3px rgba(178, 138, 84, 0.18);
+}
+.ap-mfield .field-area { resize: vertical; line-height: 1.55; }
+.ap-mfield .field-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23b28a54' d='M5 6 0 0h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 34px;
+}
+.ap-mfield .field-select option,
+.ap-mfield .field-check-group option { background: #16130f; color: var(--ivory); }
+
+.ap-mfield .field-file {
+  padding: 10px;
+  cursor: pointer;
+}
+.ap-mfield .field-file::file-selector-button {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  background: rgba(178, 138, 84, 0.18);
+  color: var(--gold-strong);
+  border: 1px solid rgba(178, 138, 84, 0.5);
+  border-radius: 8px;
+  padding: 7px 14px;
+  margin-right: 12px;
+  cursor: pointer;
+  transition: background var(--tr);
+}
+.ap-mfield .field-file::file-selector-button:hover { background: var(--gold); color: #171210; }
+
+.ap-help { margin-top: 6px; font-size: 0.78rem; color: var(--muted-2); line-height: 1.5; }
+.ap-error { margin-top: 6px; font-size: 0.8rem; color: #e0a393; }
+
+/* checkboxes & switches */
+.ap-mfield--check > label { margin-bottom: 12px; }
+.ap-mfield .field-check {
+  width: 44px;
+  height: 24px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #3a362f;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+  transition: background var(--tr), border-color var(--tr);
+  margin: 2px 0;
+}
+.ap-mfield .field-check::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: transform var(--tr), background var(--tr);
+}
+.ap-mfield .field-check:checked { background: rgba(178, 138, 84, 0.45); border-color: var(--gold); }
+.ap-mfield .field-check:checked::after { transform: translateX(20px); background: var(--gold-strong); }
+
+.ap-mfield .field-check-group {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+}
+.ap-mfield .field-check-group li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #16130f;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  color: var(--ivory);
+  cursor: pointer;
+  transition: border-color var(--tr);
+}
+.ap-mfield .field-check-group li:hover { border-color: var(--gold); }
+.ap-mfield .field-check-group input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--gold);
+  flex: none;
+}
+
+/* form action bar */
+.ap-cm-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line-soft);
+}
+.ap-cm-del--link { margin-left: auto; font-size: 0.82rem; color: #e0b3a8; }
+.ap-cm-del--link:hover { color: #f2d4cc; text-decoration: underline; }
+
+.btn--danger {
+  background: rgba(190, 90, 70, 0.85);
+  color: #fff;
+  border-color: transparent;
+}
+.btn--danger:hover { background: #c96a55; transform: translateY(-2px); }
+
+/* ---------- delete confirmation ---------- */
+.ap-cm-delbox {
+  max-width: 480px;
+  background: linear-gradient(180deg, var(--bg-2), #12100e);
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  padding: 30px 30px;
+}
+.ap-cm-del-title { font-size: 1.4rem; color: var(--ivory); margin-bottom: 8px; }
+.ap-cm-del-sub { font-size: 0.9rem; color: var(--muted-2); line-height: 1.6; margin-bottom: 6px; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 560px) {
+  .ap-cm-form { padding: 22px 18px; }
+  .ap-cm-head { flex-direction: column; align-items: flex-start; }
+  .ap-cm-actions .btn { width: 100%; }
+  .ap-cm-del--link { margin-left: 0; }
+}

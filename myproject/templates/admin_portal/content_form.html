@@ -1,0 +1,32 @@
+{% extends "admin_portal/base.html" %}
+{% block title %}{{ title }} · {{ section.name }} · Admin Portal{% endblock %}
+{% block content %}
+  <form class="ap-cm-form" method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="ap-flash ap-flash--error">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    {% for field in form %}
+      {% if field.is_hidden %}
+        {{ field }}
+      {% else %}
+        <div class="ap-mfield {% if field.field.widget.input_type == 'checkbox' %}ap-mfield--check{% endif %}">
+          <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<em class="ap-req">*</em>{% endif %}</label>
+          {{ field }}
+          {% if field.help_text %}<p class="ap-help">{{ field.help_text }}</p>{% endif %}
+          {% if field.errors %}<p class="ap-error">{{ field.errors|join:" " }}</p>{% endif %}
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    <div class="ap-cm-actions">
+      <button class="btn btn--gold" type="submit">Save {{ section.singular|lower }}</button>
+      <a class="btn btn--ghost" href="{% url 'main:portal_content_list' section.key %}">Cancel</a>
+      {% if object %}
+        <a class="ap-cm-del ap-cm-del--link" href="{% url 'main:portal_content_delete' section.key object.pk %}">Delete {{ section.singular|lower }}</a>
+      {% endif %}
+    </div>
+  </form>
+{% endblock %}

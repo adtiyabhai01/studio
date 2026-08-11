@@ -1,0 +1,56 @@
+{% load static %}
+<footer class="site-foot">
+  <div class="container">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="foot-logo" href="/">
+          {% if site.logo %}
+            <img class="nav-brand-logo" src="{{ site.logo.url }}" alt="{{ site.brand_name }} logo">
+          {% else %}
+            <span class="nav-brand-mark">C</span>
+            <span class="foot-logo-name">{{ site.brand_name }}</span>
+          {% endif %}
+        </a>
+        <p class="foot-tag">{{ site.tagline }}. {{ site.site_description }}</p>
+        <div class="foot-social">
+          {% if site.instagram %}<a href="{{ site.instagram }}" target="_blank" rel="noopener" aria-label="Instagram">Instagram</a>{% endif %}
+          {% if site.facebook %}<a href="{{ site.facebook }}" target="_blank" rel="noopener" aria-label="Facebook">Facebook</a>{% endif %}
+          {% if site.youtube %}<a href="{{ site.youtube }}" target="_blank" rel="noopener" aria-label="YouTube">YouTube</a>{% endif %}
+        </div>
+      </div>
+
+      <div class="foot-col">
+        <h4 class="foot-heading">Explore</h4>
+        <a href="/">Home</a>
+        <a href="{% url 'main:about' %}">About</a>
+        <a href="{% url 'main:portfolio' %}">Portfolio</a>
+        <a href="{% url 'main:packages' %}">Packages</a>
+        <a href="{% url 'main:testimonials' %}">Client Stories</a>
+      </div>
+
+      <div class="foot-col">
+        <h4 class="foot-heading">Services</h4>
+        {% for svc in services_list %}
+          <a href="{{ svc.get_absolute_url }}">{{ svc.name }}</a>
+        {% endfor %}
+      </div>
+
+      <div class="foot-col foot-col--contact">
+        <h4 class="foot-heading">Studio</h4>
+        {% if site.address %}<p class="foot-line">{{ site.address }}</p>{% endif %}
+        <p class="foot-line"><a href="tel:{{ site.phones }}">{{ site.phones }}</a></p>
+        {% if site.email %}<p class="foot-line"><a href="mailto:{{ site.email }}">{{ site.email }}</a></p>{% endif %}
+        <a href="{% url 'main:contact' %}" class="btn btn--gold btn--sm">Get a Quote</a>
+      </div>
+    </div>
+
+    <div class="foot-cities">
+      {% for city in featured_cities %}<span class="foot-city">{{ city.name }}</span>{% endfor %}
+    </div>
+
+    <div class="foot-bottom">
+      <p>&copy; {% now "Y" %} {{ site.brand_name }}. All rights reserved.</p>
+      <p>Crafted with light, patience &amp; love.</p>
+    </div>
+  </div>
+</footer>

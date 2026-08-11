@@ -1,0 +1,20 @@
+/* =========================================================
+   wedding.css — wedding service page styles.
+   ========================================================= */
+
+.svc-intro { max-width: 720px; }
+.svc-intro-text { margin-top: 18px; color: var(--muted); font-size: 1.02rem; }
+.section--alt .svc-intro-text, .section--light .svc-intro-text { color: #5c5040; }
+
+#gallery, #words { background: var(--cream); }
+#gallery .section-head, #words .section-head { margin-inline: auto; text-align: center; }
+#gallery .masonry { margin-top: 12px; }
+
+#films, #offers { background: var(--bg-2); }
+
+/* wedding packages */
+#wedding-packages { background: var(--bg); }
+
+@media (max-width: 720px) {
+  .svc-hero { min-height: 68vh; }
+}

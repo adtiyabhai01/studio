@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}About Us — {{ site.brand_name }} Photography & Videography{% endblock %}
+{% block meta_description %}The story and philosophy behind {{ site.brand_name }} — why couples and families across cities trust us with their most precious moments.{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/about.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div class="container">
+    <p class="eyebrow eyebrow--gold reveal">About the studio</p>
+    <h1 class="page-hero-title reveal">We don't take photographs,<br><em>we take stories home.</em></h1>
+    <p class="page-hero-sub reveal">{{ site.site_description }}</p>
+  </div>
+</section>
+
+<section class="section section--pad">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-story reveal">
+        <p class="eyebrow eyebrow--gold">Our story</p>
+        <h2 class="section-title">A decade of <em>light</em>, patience &amp; heart</h2>
+        <p class="about-p">What began as one camera and a stubborn belief — that Indian celebrations deserve cinema-grade storytelling — has grown into a full travel studio serving every city.</p>
+        <p class="about-p">We don't follow trends. We follow light, emotion and the people in front of the lens. Every wedding, every pregnancy, every first birthday is treated as an unrepeatable film.</p>
+        <blockquote class="about-quote">“The best camera is the one that makes your family cry happy tears when they watch the film.”</blockquote>
+      </div>
+      <div class="about-visual reveal">
+        <div class="about-frame">
+          {% if site.hero_fallback %}
+            <img src="{{ site.hero_fallback.url }}" alt="{{ site.brand_name }} studio" loading="lazy">
+          {% else %}
+            <span class="about-frame-mono">{{ site.brand_name|slice:":1" }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if stats_facts %}
+<section class="section stats about-stats">
+  <div class="container stats-grid" data-reveal-facts>
+    {% for fact in stats_facts %}
+      <div class="stat"><span class="stat-num" data-count="{{ fact.value }}">{{ fact.value }}</span><span class="stat-label">{{ fact.label }}</span></div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="section section--dark section--pad" id="philosophy">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">Philosophy</p>
+      <h2 class="section-title">Why families <em>choose us</em></h2>
+    </header>
+    <div class="why-grid">
+      <div class="why reveal"><h3>Candid first</h3><p>Posed is optional. Real laughter, tears and glances — that's the brief. Every time.</p></div>
+      <div class="why reveal"><h3>Cinematic always</h3><p>Our films are graded, scored and cut like a feature. Your wedding day deserves a trailer.</p></div>
+      <div class="why reveal"><h3>Travel-friendly</h3><p>No city restrictions. We bring crew, lighting and drones to any venue in the country.</p></div>
+      <div class="why reveal"><h3>Budget-respectful</h3><p>Premium craft at honest price points — luxury results without hidden costs.</p></div>
+      <div class="why reveal"><h3>Family-sometimes awkward</h3><p>We direct gently. Within ten minutes even the shyest of uncles forgets the camera is there.</p></div>
+      <div class="why reveal"><h3>Delivery on promise</h3><p>Edited galleries and films delivered on the date we promise. Always.</p></div>
+    </div>
+  </div>
+</section>
+
+{% if team %}
+<section class="section section--pad" id="team">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">The people</p>
+      <h2 class="section-title">The hands behind <em>the lens</em></h2>
+    </header>
+    <div class="team-grid">
+      {% for member in team %}
+        <article class="team reveal">
+          {% if member.photo %}
+            <img class="team-photo" src="{{ member.photo.url }}" alt="{{ member.name }}" loading="lazy">
+          {% else %}
+            <div class="team-photo team-photo--mono">{{ member.name|slice:":1" }}</div>
+          {% endif %}
+          <h3 class="team-name">{{ member.name }}</h3>
+          <p class="team-role">{{ member.role }}</p>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section section--pad section--dark">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">Currently booking</p>
+      <h2 class="section-title">Your date won't wait, <em>neither do we.</em></h2>
+      <p class="section-sub">{{ site.brand_name }} only accepts a limited number of events per month to protect quality.</p>
+    </header>
+    <div class="cta-actions reveal" style="justify-content:center;">
+      <a class="btn btn--gold btn--lg" href="{% url 'main:contact' %}">Check Availability</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,61 @@
+/* =========================================================
+   portfolio.css — portfolio page styles (filtering grid).
+   ========================================================= */
+
+.section--flow { background: var(--bg); }
+
+/* ---------- filter bar ---------- */
+
+.filterbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 44px;
+}
+.filter {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 12px 22px;
+  border: 1px solid var(--line);
+  border-radius: 40px;
+  transition: color var(--tr), background var(--tr), border-color var(--tr);
+}
+.filter:hover { color: var(--ivory); border-color: var(--gold); }
+.filter--active { background: var(--gold); color: #171210; border-color: var(--gold); }
+
+/* ---------- masonry gallery ---------- */
+
+.portfolio-grid {
+  columns: 3 300px;
+  column-gap: 20px;
+  min-height: 200px;
+}
+.portfolio-grid .g-item { transition: opacity 0.4s var(--ease), transform 0.4s var(--ease); }
+.portfolio-grid .g-item.is-filtering { opacity: 0; }
+.portfolio-grid .g-item.is-hidden { display: none; }
+.portfolio-grid .g-item.is-shown { animation: showUp 0.5s var(--ease) both; }
+@keyframes showUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- films section ---------- */
+
+#portfolio ~ .section--dark { background: var(--bg-2); }
+
+/* duplicate protection: after filtering, keep grid safe */
+.portfolio-grid:empty::after {
+  content: "Nothing in this category yet — check back soon.";
+  color: var(--muted);
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+  .portfolio-grid { columns: 2 260px; }
+}
+@media (max-width: 560px) {
+  .portfolio-grid { columns: 1; }
+}

@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Wedding Photography & Videography — {{ site.brand_name }}{% endblock %}
+{% block meta_description %}Cinematic wedding photography and filmmaking every budget trusts. Affordable to luxury wedding packages, engagement, pre-wedding and destination coverage.{% endblock %}
+
+{% block og_title %}{{ site.brand_name }} — Wedding Photography & Cinemagraph{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/wedding.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="svc-hero">
+  {% if hero_video %}
+    <video class="svc-hero-video" autoplay muted loop playsinline preload="none" poster="{% if service.video_poster %}{{ service.video_poster.url }}{% endif %}">
+      <source src="{{ hero_video.url }}" type="video/mp4">
+    </video>
+  {% elif hero_image %}
+    <img class="svc-hero-img" src="{{ hero_image.url }}" alt="{{ page_heading }}" fetchpriority="high">
+  {% endif %}
+  <div class="svc-hero-shade"></div>
+  <div class="container svc-hero-content">
+    <p class="eyebrow eyebrow--gold reveal">Wedding Stories</p>
+    <h1 class="page-hero-title reveal">Weddings, shot like <em>film</em></h1>
+    <p class="page-hero-sub reveal">{{ service.tagline|default:"From intimate pheras to destination palaces — every budget, every emotion, every city." }}</p>
+    <div class="hero-actions reveal">
+      <a href="{% url 'main:packages' %}" class="btn btn--gold btn--lg">View Wedding Packages</a>
+      <a href="{{ hero_wa }}" target="_blank" rel="noopener" class="btn btn--ghost btn--lg">WhatsApp Us</a>
+    </div>
+  </div>
+</section>
+
+<section class="section section--pad">
+  <div class="container">
+    <div class="svc-intro reveal">
+      <p class="eyebrow eyebrow--gold">Why wedding coverage</p>
+      <h2 class="section-title">The day you'll rewatch <em>for fifty years</em></h2>
+      <p class="svc-intro-text">{{ service.description|default:"Your wedding is a film with one take. Our photographers and cinematographers work as one unit — catching rituals, giggles, giddiness and the goosebumps — then deliver a gallery and a film that put your family right back in the mandap." }}</p>
+    </div>
+  </div>
+</section>
+
+{% if images %}
+<section class="section section--pad section--alt" id="gallery">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">Wedding gallery</p>
+      <h2 class="section-title">Frames from <em>recent weddings</em></h2>
+    </header>
+    <div class="masonry">
+      {% for image in images|slice:":8" %}
+        {% include "partials/gallery_item.html" with image=image %}
+      {% endfor %}
+    </div>
+    <div class="section-more reveal">
+      <a href="{% url 'main:portfolio' %}?category=wedding" class="btn btn--ghost">View all weddings <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if videos %}
+<section class="section section--pad section--dark" id="films">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">Wedding films</p>
+      <h2 class="section-title">One highlight, a <em>thousand memories</em></h2>
+    </header>
+    <div class="v-grid">
+      {% for video in videos %}
+        <article class="v-card reveal" data-video="{{ video.embed_id|default:'' }}" data-src="{{ video.video.url|default:'' }}">
+          <div class="v-media">
+            {% if video.poster %}
+              <img class="v-img" src="{{ video.poster.url }}" alt="{{ video.title }}" loading="lazy">
+            {% else %}
+              <div class="v-img v-img--mono">{{ video.title|slice:":1" }}</div>
+            {% endif %}
+            <button class="v-play" type="button" aria-label="Play {{ video.title }}">▶</button>
+          </div>
+          <h3 class="v-title">{{ video.title }}</h3>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if packages %}
+<section class="section section--pad" id="wedding-packages">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">Wedding packages</p>
+      <h2 class="section-title">Pick the <em>perfect plan</em></h2>
+      <p class="section-sub">Every package customisable — add a filmmaker, a drone pass or a couture album anytime.</p>
+    </header>
+    <div class="pricing-grid">
+      {% for package in packages %}
+        {% include "partials/package_card.html" with package=package %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if offers %}
+<section class="section section--pad section--dark" id="offers">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">Wedding offers</p>
+      <h2 class="section-title">Celebrate smarter, <em>save beautifully</em></h2>
+    </header>
+    <div class="offers-grid">
+      {% for offer in offers|slice:":2" %}
+        {% include "partials/offer_card.html" with offer=offer %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if testimonials %}
+<section class="section section--pad section--alt" id="words">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">Wedding families</p>
+      <h2 class="section-title">What <em>our couples</em> say</h2>
+    </header>
+    <div class="t-grid">
+      {% for testimonial in testimonials|slice:":3" %}
+        {% include "partials/testimonial_card.html" with testimonial=testimonial %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% include "partials/cta.html" %}
+
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/portfolio.js' %}"></script>
+{% endblock %}

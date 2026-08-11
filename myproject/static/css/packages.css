@@ -1,0 +1,25 @@
+/* =========================================================
+   packages.css — packages & pricing page styles.
+   ========================================================= */
+
+.section { background: var(--bg); }
+.section--alt { background: var(--cream); }
+.section--alt .section-head .section-title { color: #26211a; }
+.section--alt .section-sub { color: var(--muted-2); }
+
+.pricing-grid { margin-top: 6px; }
+
+.empty { text-align: center; }
+
+/* ---------- notes ---------- */
+
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.note { background: var(--bg-2); padding: 30px 26px; }
+.note h3 { color: var(--gold-strong); font-size: 1.2rem; margin-bottom: 10px; }
+.note p { color: var(--muted); font-size: 0.93rem; }
