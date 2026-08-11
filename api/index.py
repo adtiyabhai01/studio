@@ -7,11 +7,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'myproject'))
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
 
-try:
-    from myproject.wsgi import application as app
-except Exception:
-    tb = traceback.format_exc()
+_IMPORT_ERROR = None
 
-    def app(environ, start_response):
-        start_response("500 Internal Server Error", [("Content-Type", "text/plain; charset=utf-8")])
-        return [tb.encode("utf-8")]
+try:
+    from myproject.wsgi import application as _application
+except Exception:
+    _IMPORT_ERROR = traceback.format_exc()
+    _application = None
+
+
+def application(environ, start_response):
+    if _application is not None:
+        return _application(environ, start_response)
+    start_response("500 Internal Server Error", [("Content-Type", "text/plain; charset=utf-8")])
+    return [_IMPORT_ERROR.encode("utf-8")]
