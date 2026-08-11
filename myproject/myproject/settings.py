@@ -189,6 +189,20 @@ WHITENOISE_USE_FINDERS = True
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# On Vercel the serverless filesystem is read-only, so uploads go to Vercel
+# Blob storage when a token is configured. Falls back to the local filesystem
+# for development.
+if os.environ.get('BLOB_READ_WRITE_TOKEN'):
+    STORAGES = {
+        'default': {
+            'BACKEND': 'myapp.vercel_blob_storage.VercelBlobStorage',
+            'OPTIONS': {'access': 'public'},
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        },
+    }
+
 # Upload limits — allow large photo/video uploads through the admin.
 # FILE_UPLOAD_MAX_MEMORY_SIZE caps a single uploaded file;
 # DATA_UPLOAD_MAX_MEMORY_SIZE caps the whole request body (keep it larger).
