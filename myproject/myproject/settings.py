@@ -181,6 +181,10 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Serve static directly from the committed source dirs (works without a
+# bundled staticfiles dir on serverless platforms like Vercel).
+WHITENOISE_USE_FINDERS = True
+
 # Media (user uploaded photography / video)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
