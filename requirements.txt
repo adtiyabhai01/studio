@@ -1,1 +1,4 @@
--r myproject/requirements.txt
+Django==6.1
+Pillow>=10.0
+psycopg[binary]>=3.2
+whitenoise>=6.0
