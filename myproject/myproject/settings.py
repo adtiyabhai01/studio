@@ -127,6 +127,11 @@ if DATABASE_URL:
     db_url = urllib.parse.urlparse(DATABASE_URL)
     if db_url.scheme in ('postgres', 'postgresql'):
         options = dict(urllib.parse.parse_qsl(db_url.query))
+        VALID_SSLMODES = ('disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full')
+        sslmode = options.get('sslmode', 'require')
+        if sslmode not in VALID_SSLMODES:
+            sslmode = 'require'
+        options['sslmode'] = sslmode
         DATABASES['default'] = {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': db_url.path.lstrip('/'),
@@ -134,9 +139,8 @@ if DATABASE_URL:
             'PASSWORD': db_url.password or '',
             'HOST': db_url.hostname or '',
             'PORT': db_url.port or '5432',
+            'OPTIONS': options,
         }
-        if options:
-            DATABASES['default']['OPTIONS'] = options
 
 
 # Password validation
