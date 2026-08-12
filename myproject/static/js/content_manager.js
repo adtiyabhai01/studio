@@ -210,14 +210,29 @@
     // Sends video bytes straight to Cloudinary (no size limit), bypassing
     // Vercel's ~4.5 MB serverless request cap. Stores the returned public_id
     // in the hidden <name>_direct field, which the server saves as a reference.
+    // Errors show the exact Cloudinary / network message on screen for easy fixing.
     function attachVideoDirect(input, form) {
       var cfg = window.CLOUDINARY_CONFIG || {};
       var hidden = form.querySelector('[name="' + input.name + '_direct"]');
       var folder = input.dataset.folder || "videos";
 
-      function fail(msg) {
+      function setError(msg, detail) {
         if (hidden) hidden.value = "";
-        setStatus(input, msg, true);
+        var note = statusEl(input);
+        if (note) {
+          note.classList.add("is-error");
+          note.style.display = "block";
+          note.innerHTML = "";
+          var main = document.createElement("strong");
+          main.textContent = msg;
+          note.appendChild(main);
+          if (detail) {
+            var box = document.createElement("code");
+            box.style.cssText = "display:block;margin-top:6px;padding:8px 10px;background:rgba(190,90,70,0.12);border:1px solid rgba(190,90,70,0.4);border-radius:8px;font-size:0.78rem;color:#f2d4cc;white-space:pre-wrap;word-break:break-word;";
+            box.textContent = detail;
+            note.appendChild(box);
+          }
+        }
         clearInput(input);
       }
 
@@ -228,8 +243,21 @@
           if (!input.dataset.hasVideo) setStatus(input, "", false);
           return;
         }
-        if (!cfg.cloudName || !cfg.uploadPreset) {
-          fail("Direct upload is not configured yet. Add the Cloudinary upload preset and retry.");
+
+        if (!cfg.cloudName && !cfg.uploadPreset) {
+          setError(
+            "Direct upload is not configured.",
+            "Missing env vars: CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET. " +
+            "Set both in .env (local) and in Vercel Settings → Environment Variables (Production), then redeploy."
+          );
+          return;
+        }
+        if (!cfg.cloudName) {
+          setError("Cloud name is missing.", "Set CLOUDINARY_CLOUD_NAME in .env and in Vercel env vars, then redeploy.");
+          return;
+        }
+        if (!cfg.uploadPreset) {
+          setError("Upload preset is missing.", "Set CLOUDINARY_UPLOAD_PRESET (your unsigned preset name) in .env and in Vercel env vars, then redeploy.");
           return;
         }
 
@@ -249,22 +277,30 @@
         xhr.onload = function () {
           var ok = xhr.status >= 200 && xhr.status < 300;
           var publicId = "";
-          if (ok) {
-            try {
-              publicId = (JSON.parse(xhr.responseText) || {}).public_id || "";
-            } catch (err) {}
+          var detail = "HTTP " + xhr.status;
+          try {
+            var parsed = JSON.parse(xhr.responseText) || {};
+            publicId = parsed.public_id || "";
+            if (parsed.error && parsed.error.message) {
+              detail = "HTTP " + xhr.status + " — " + parsed.error.message;
+            }
+          } catch (err) {
+            detail = "HTTP " + xhr.status + " — " + String(xhr.responseText).slice(0, 300);
           }
           if (publicId) {
             if (hidden) hidden.value = publicId;
             input.dataset.hasVideo = "1";
             clearInput(input);
             setStatus(input, "Video uploaded \u2713  (" + fmt(file.size) + ", full quality).", false);
+            console.info("Cloudinary upload OK:", publicId);
           } else {
-            fail("Upload failed (" + xhr.status + "). Please retry or use a smaller video.");
+            console.error("Cloudinary upload failed:", xhr.responseText);
+            setError("Upload failed.", detail + "\n\nTip: The most common cause is the preset name or 'Unsigned uploading' being off in Cloudinary → Settings → Upload → presets.");
           }
         };
         xhr.onerror = function () {
-          fail("Upload failed — check your connection and retry.");
+          console.error("Cloudinary upload network error");
+          setError("Upload failed — network error.", "The request never reached Cloudinary.\nCheck: internet connection and that no ad-block/firewall is blocking api.cloudinary.com.\nOpen DevTools (F12) → Network tab and retry to see the exact failed request.");
         };
         xhr.send(fd);
       });
