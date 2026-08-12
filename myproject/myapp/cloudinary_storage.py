@@ -1,12 +1,10 @@
 from cloudinary import CloudinaryResource
 from cloudinary_storage.storage import VideoMediaCloudinaryStorage
 
-# Cloudinary delivery transformation applied to every served video URL.
-# Re-encodes to MP4 (H.264), caps width at Full HD, and uses near-lossless
-# auto quality so hero / highlight reels keep their cinematic sharpness.
-VIDEO_TRANSFORMATIONS = [
-    {"width": 1920, "crop": "limit", "quality": "auto:best", "fetch_format": "mp4"}
-]
+# Videos are delivered in their ORIGINAL quality — no re-encode, no downscale.
+# Upload an H.264 MP4 (AAC audio) for the widest browser support, especially
+# Safari/iOS, which cannot play WebM or non-H.264 codecs.
+VIDEO_TRANSFORMATIONS = []
 
 
 class SmartVideoCloudinaryStorage(VideoMediaCloudinaryStorage):
