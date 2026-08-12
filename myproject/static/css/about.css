@@ -59,6 +59,8 @@
 
 /* ---------- team ---------- */
 
+#developer { border-top: 1px solid var(--line); }
+
 .team-dev {
   display: flex; align-items: center; gap: 36px;
   max-width: 880px; margin: 0 auto 40px;
