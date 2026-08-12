@@ -122,9 +122,12 @@ def home(request):
 
 def about(request):
     site = SiteSettings.load()
+    members = list(TeamMember.objects.filter(is_active=True))
+    team_developer = next((m for m in members if m.is_developer), None)
     context = {
         "active": "about",
-        "team": list(TeamMember.objects.filter(is_active=True)),
+        "team_developer": team_developer,
+        "team": [m for m in members if not m.is_developer],
         "services": list(Service.objects.filter(is_active=True)),
         "stats_facts": [
             {"value": site.years_experience, "label": "Years of craft"},

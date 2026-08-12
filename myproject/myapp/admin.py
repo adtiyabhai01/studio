@@ -253,9 +253,19 @@ class TestimonialAdmin(admin.ModelAdmin):
 
 @admin.register(TeamMember)
 class TeamMemberAdmin(admin.ModelAdmin):
-    list_display = ("name", "role", "is_active", "sort_order")
+    list_display = ("name", "role", "developer", "is_active", "sort_order")
+    list_filter = ("is_developer", "is_active")
     search_fields = ("name", "role")
     list_editable = ("is_active", "sort_order")
+    fieldsets = (
+        (None, {"fields": ("name", "role", "bio")}),
+        ("Profile photo", {"fields": ("photo",)}),
+        ("Position", {"fields": ("is_developer", "is_active", "sort_order")}),
+    )
+
+    @admin.display(boolean=True, description="Developer")
+    def developer(self, obj):
+        return obj.is_developer
 
 
 @admin.register(Enquiry)

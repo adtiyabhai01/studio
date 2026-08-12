@@ -59,6 +59,35 @@
 
 /* ---------- team ---------- */
 
+.team-dev {
+  display: flex; align-items: center; gap: 40px;
+  max-width: 880px; margin: 0 auto 58px;
+  padding: 34px 38px;
+  background: linear-gradient(180deg, var(--bg-2), #12100e);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+}
+.team-dev-photo { position: relative; flex: 0 0 auto; }
+.team-dev-img {
+  width: 220px; height: 220px; border-radius: 50%; object-fit: cover;
+  display: block; border: 3px solid var(--gold);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45), 0 0 0 6px rgba(178, 138, 84, 0.18);
+}
+.team-dev-img--mono {
+  display: grid; place-items: center;
+  background: linear-gradient(160deg, #2b251e, #16130f);
+  font-family: var(--serif); font-size: 5rem; color: var(--gold);
+}
+.team-dev-badge {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  background: var(--gold); color: #171210; white-space: nowrap;
+  font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 5px 14px; border-radius: 999px;
+}
+.team-dev-name { font-family: var(--serif); font-size: 2rem; color: var(--gold-strong); }
+.team-dev-role { color: var(--muted); font-size: 0.85rem; letter-spacing: 0.22em; text-transform: uppercase; margin-top: 4px; }
+.team-dev-bio { color: var(--muted); font-size: 0.98rem; line-height: 1.7; margin-top: 14px; }
+
 .team-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -66,8 +95,8 @@
 }
 .team { text-align: center; }
 .team-photo {
-  width: 100%; aspect-ratio: 4 / 5; object-fit: cover;
-  border-radius: 2px;
+  width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
+  border-radius: 50%;
   filter: saturate(0.92);
   transition: filter var(--tr), transform var(--tr);
 }
@@ -76,6 +105,7 @@
   display: grid; place-items: center;
   background: linear-gradient(160deg, #2b251e, #16130f);
   border: 1px solid var(--line);
+  border-radius: 50%;
   font-family: var(--serif); font-size: 4.5rem; color: var(--gold);
 }
 .team-name { margin-top: 18px; font-size: 1.3rem; }
@@ -86,6 +116,12 @@
 @media (max-width: 860px) {
   .about-grid { grid-template-columns: 1fr; }
   .why-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 640px) {
+  .team-dev { flex-direction: column; text-align: center; gap: 24px; padding: 28px 22px; }
+  .team-dev-img { width: 180px; height: 180px; }
+  .team-dev-bio { margin-inline: auto; }
 }
 @media (max-width: 560px) {
   .why-grid { grid-template-columns: 1fr; }

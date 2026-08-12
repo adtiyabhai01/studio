@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
@@ -596,14 +597,38 @@ class TeamMember(TimeStampedModel):
     role = models.CharField(max_length=120, blank=True)
     photo = models.ImageField(upload_to="team/", blank=True, null=True)
     bio = models.TextField(blank=True)
+    is_developer = models.BooleanField(
+        default=False,
+        help_text="Mark this member as the site Developer. Only one Developer is allowed at a time.",
+    )
     is_active = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
 
     class Meta:
-        ordering = ["sort_order", "name"]
+        ordering = ["-is_developer", "sort_order", "name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["is_developer"],
+                condition=models.Q(is_developer=True),
+                name="single_developer",
+            ),
+        ]
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        super().clean()
+        if self.is_developer:
+            exists = TeamMember.objects.filter(is_developer=True).exclude(pk=self.pk).exists()
+            if exists:
+                raise ValidationError(
+                    {"is_developer": "Only one Developer can be marked. Unmark the existing Developer first."}
+                )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
 
 # ---------------------------------------------------------------------------

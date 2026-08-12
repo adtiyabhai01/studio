@@ -68,13 +68,34 @@
   </div>
 </section>
 
-{% if team %}
+{% if team_developer or team %}
 <section class="section section--pad" id="team">
   <div class="container">
     <header class="section-head reveal">
       <p class="eyebrow eyebrow--gold">The people</p>
       <h2 class="section-title">The hands behind <em>the lens</em></h2>
     </header>
+
+    {% if team_developer %}
+    <aside class="team-dev reveal">
+      <div class="team-dev-photo">
+        {% if team_developer.photo %}
+          <img class="team-dev-img" src="{{ team_developer.photo.url }}" alt="{{ team_developer.name }}" loading="lazy">
+        {% else %}
+          <span class="team-dev-img team-dev-img--mono">{{ team_developer.name|slice:":1" }}</span>
+        {% endif %}
+        <span class="team-dev-badge">Developer</span>
+      </div>
+      <div class="team-dev-copy">
+        <p class="eyebrow eyebrow--gold">Meet the Developer</p>
+        <h3 class="team-dev-name">{{ team_developer.name }}</h3>
+        <p class="team-dev-role">{{ team_developer.role|default:"Developer" }}</p>
+        {% if team_developer.bio %}<p class="team-dev-bio">{{ team_developer.bio }}</p>{% endif %}
+      </div>
+    </aside>
+    {% endif %}
+
+    {% if team %}
     <div class="team-grid">
       {% for member in team %}
         <article class="team reveal">
@@ -88,6 +109,7 @@
         </article>
       {% endfor %}
     </div>
+    {% endif %}
   </div>
 </section>
 {% endif %}

@@ -272,7 +272,7 @@ class HeroVideoForm(PortalModelForm):
 class TeamMemberForm(PortalModelForm):
     class Meta:
         model = TeamMember
-        fields = ["name", "role", "photo", "bio", "is_active", "sort_order"]
+        fields = ["name", "role", "photo", "is_developer", "bio", "is_active", "sort_order"]
         widgets = {
             "role": forms.TextInput(attrs={"placeholder": "e.g. Lead Photographer"}),
             "bio": forms.Textarea(attrs={"rows": 4}),
@@ -518,6 +518,7 @@ CONTENT_SECTIONS = {
             {"label": "Photo", "value": lambda o: _thumb(o, "photo"), "html": True},
             {"label": "Name", "value": "name"},
             {"label": "Role", "value": "role"},
+            {"label": "Developer", "value": lambda o: _badge(o.is_developer), "html": True},
             {"label": "Active", "value": lambda o: _badge(o.is_active), "html": True},
         ],
         search_fields=["name", "role"],
