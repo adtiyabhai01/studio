@@ -8,6 +8,7 @@ records are listed, searched and paginated inside the portal.
 """
 
 from django import forms
+from django.conf import settings
 from django.utils.html import format_html
 from django.utils.text import slugify
 
@@ -73,6 +74,47 @@ class PortalModelForm(forms.ModelForm):
             existing = widget.attrs.get("class", "")
             widget.attrs["class"] = (existing + " " + css).strip()
 
+        # Video fields: replaced by a browser→Cloudinary direct upload. The real
+        # file input stays (so device pickers work), plus a hidden <name>_direct
+        # field that receives the Cloudinary public_id without sending the bytes
+        # through Vercel's 4.5 MB serverless function.
+        for name in self._meta_video_fields():
+            field = self.fields[name]
+            field.required = False
+            field.help_text = (field.help_text + " " if field.help_text else "") + (
+                "Large videos upload directly to Cloudinary — full quality is kept."
+            )
+            widget = field.widget
+            widget.attrs["accept"] = "video/*"
+            widget.attrs["data-video-direct"] = "1"
+            model_field = self._meta.model._meta.get_field(name)
+            if isinstance(model_field.upload_to, str):
+                media_prefix = getattr(settings, "MEDIA_URL", "media/").strip("/")
+                folder = f"{media_prefix}/{model_field.upload_to.strip('/')}".strip("/")
+                widget.attrs["data-folder"] = folder
+            self.fields[f"{name}_direct"] = forms.CharField(
+                required=False, widget=forms.HiddenInput()
+            )
+            self.fields[f"{name}_direct"].widget.attrs["class"] = "video-direct-id"
+
+    def _meta_video_fields(self):
+        meta = getattr(type(self), "Meta", None)
+        names = getattr(meta, "video_fields", ()) if meta else ()
+        return [name for name in names if name in self.fields]
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        for name in self._meta_video_fields():
+            direct = (self.cleaned_data.get(f"{name}_direct") or "").strip()
+            if not direct or "://" in direct:
+                continue
+            # Store the Cloudinary public_id reference directly — no re-upload.
+            setattr(obj, name, direct)
+        if commit:
+            obj.save()
+            self.save_m2m()
+        return obj
+
     def _ensure_unique_slug(self, source_fields=("name", "title")):
         """Return a URL-safe unique slug, filling it from a text field when empty."""
         slug = (self.cleaned_data.get("slug") or "").strip()
@@ -108,6 +150,7 @@ class ServiceForm(PortalModelForm):
             "description", "image", "video", "video_poster",
             "is_featured", "is_active", "sort_order",
         ]
+        video_fields = ("video",)
         widgets = {
             "icon_key": forms.TextInput(
                 attrs={"placeholder": "e.g. wedding, prewedding, maternity, baby"}
@@ -181,6 +224,7 @@ class OfferForm(PortalModelForm):
             "original_price", "offer_price", "start_date", "end_date",
             "image", "video", "is_featured", "is_active", "sort_order",
         ]
+        video_fields = ("video",)
         widgets = {
             "description": forms.Textarea(attrs={"rows": 4}),
             "included_services": forms.Textarea(
@@ -237,6 +281,7 @@ class PortfolioVideoForm(PortalModelForm):
             "category", "title", "video", "youtube_url", "poster",
             "is_featured", "is_active", "sort_order",
         ]
+        video_fields = ("video",)
         widgets = {
             "title": forms.TextInput(attrs={"placeholder": "Short title for this film"}),
             "youtube_url": forms.URLInput(attrs={"placeholder": "https://www.youtube.com/watch?v=…"}),
@@ -267,6 +312,7 @@ class HeroVideoForm(PortalModelForm):
     class Meta:
         model = HeroVideo
         fields = ["title", "video", "poster", "is_featured", "is_active", "sort_order"]
+        video_fields = ("video",)
 
 
 class TeamMemberForm(PortalModelForm):

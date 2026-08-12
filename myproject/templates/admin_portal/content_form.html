@@ -29,4 +29,15 @@
       {% endif %}
     </div>
   </form>
+
+  {{ cloudinary_config|json_script:"cdn-upload-config" }}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    var el = document.getElementById("cdn-upload-config");
+    window.CLOUDINARY_CONFIG = el ? JSON.parse(el.textContent) : {};
+  })();
+</script>
 {% endblock %}

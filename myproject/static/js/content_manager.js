@@ -197,7 +197,77 @@
 
     var form = document.querySelector(".ap-cm-form");
     if (form) {
-      Array.prototype.forEach.call(form.querySelectorAll('input[type="file"]'), attachUploadGuard);
+      Array.prototype.forEach.call(form.querySelectorAll('input[type="file"]'), function (input) {
+        if (input.dataset.videoDirect === "1") {
+          attachVideoDirect(input, form);
+        } else {
+          attachUploadGuard(input);
+        }
+      });
+    }
+
+    /* ---------- direct browser→Cloudinary video upload ---------- */
+    // Sends video bytes straight to Cloudinary (no size limit), bypassing
+    // Vercel's ~4.5 MB serverless request cap. Stores the returned public_id
+    // in the hidden <name>_direct field, which the server saves as a reference.
+    function attachVideoDirect(input, form) {
+      var cfg = window.CLOUDINARY_CONFIG || {};
+      var hidden = form.querySelector('[name="' + input.name + '_direct"]');
+      var folder = input.dataset.folder || "videos";
+
+      function fail(msg) {
+        if (hidden) hidden.value = "";
+        setStatus(input, msg, true);
+        clearInput(input);
+      }
+
+      input.addEventListener("change", function () {
+        var file = input.files && input.files[0];
+        if (hidden) hidden.value = "";
+        if (!file) {
+          if (!input.dataset.hasVideo) setStatus(input, "", false);
+          return;
+        }
+        if (!cfg.cloudName || !cfg.uploadPreset) {
+          fail("Direct upload is not configured yet. Add the Cloudinary upload preset and retry.");
+          return;
+        }
+
+        setStatus(input, "Uploading " + fmt(file.size) + " to Cloudinary\u2026", false);
+        var fd = new FormData();
+        fd.append("file", file);
+        fd.append("upload_preset", cfg.uploadPreset);
+        fd.append("folder", folder);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "https://api.cloudinary.com/v1_1/" + cfg.cloudName + "/video/upload");
+        xhr.upload.onprogress = function (e) {
+          if (e.lengthComputable) {
+            setStatus(input, "Uploading " + Math.round((e.loaded / e.total) * 100) + "%", false);
+          }
+        };
+        xhr.onload = function () {
+          var ok = xhr.status >= 200 && xhr.status < 300;
+          var publicId = "";
+          if (ok) {
+            try {
+              publicId = (JSON.parse(xhr.responseText) || {}).public_id || "";
+            } catch (err) {}
+          }
+          if (publicId) {
+            if (hidden) hidden.value = publicId;
+            input.dataset.hasVideo = "1";
+            clearInput(input);
+            setStatus(input, "Video uploaded \u2713  (" + fmt(file.size) + ", full quality).", false);
+          } else {
+            fail("Upload failed (" + xhr.status + "). Please retry or use a smaller video.");
+          }
+        };
+        xhr.onerror = function () {
+          fail("Upload failed — check your connection and retry.");
+        };
+        xhr.send(fd);
+      });
     }
   });
 })();

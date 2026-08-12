@@ -618,6 +618,15 @@ def portal_content_list(request, key):
     return render(request, "admin_portal/content_list.html", context)
 
 
+def _portal_cloudinary_config():
+    from django.conf import settings
+
+    return {
+        "cloud_name": settings.CLOUDINARY_STORAGE.get("CLOUD_NAME", ""),
+        "upload_preset": getattr(settings, "CLOUDINARY_UPLOAD_PRESET", ""),
+    }
+
+
 def portal_content_add(request, key):
     section = _portal_section(request, key)
 
@@ -639,6 +648,7 @@ def portal_content_add(request, key):
         "form": form,
         "title": f"Add {section.singular}",
         "object": None,
+        "cloudinary_config": _portal_cloudinary_config(),
     }
     return render(request, "admin_portal/content_form.html", context)
 
@@ -661,6 +671,7 @@ def portal_content_edit(request, key, pk):
         "form": form,
         "title": f"Edit {section.singular}",
         "object": obj,
+        "cloudinary_config": _portal_cloudinary_config(),
     }
     return render(request, "admin_portal/content_form.html", context)
 

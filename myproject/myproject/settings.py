@@ -199,6 +199,12 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', ''),
 }
 
+# Unsigned upload preset for browser→Cloudinary direct video uploads (bypasses
+# the ~4.5 MB Vercel serverless body limit so full-quality videos can be used).
+# Create it in the Cloudinary dashboard (Settings → Upload → Add upload preset,
+# mode "Unsigned", unsigned uploading allowed) and set its name here / on Vercel.
+CLOUDINARY_UPLOAD_PRESET = os.environ.get('CLOUDINARY_UPLOAD_PRESET', '')
+
 # Default storage → Cloudinary (works on Vercel's read-only filesystem).
 # Video FileFields override with the video storage class.
 STORAGES = {
