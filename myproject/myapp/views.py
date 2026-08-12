@@ -10,6 +10,7 @@ from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .content import CONTENT_SECTIONS
+from .health import HEALTH_LABELS, build_health_report
 
 HEX_COLOR_RE = re.compile(r"^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$")
 
@@ -466,6 +467,10 @@ def _portal_context(request):
             {"key": "muted_secondary", "label": "Fainter text"},
         ],
     }
+    health_report = build_health_report()
+    context["health"] = health_report
+    context["health_json"] = json.dumps(health_report)
+    context["health_labels"] = HEALTH_LABELS
     return context
 
 
@@ -547,6 +552,14 @@ def admin_portal(request):
 def admin_portal_logout(request):
     logout(request)
     return redirect("main:admin_portal")
+
+
+def portal_health(request):
+    """JSON snapshot of live server, database and media-storage usage (staff only)."""
+    can_manage = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+    if not can_manage:
+        return JsonResponse({"error": "unauthorized"}, status=403)
+    return JsonResponse(build_health_report())
 
 
 # ---------------------------------------------------------------------------

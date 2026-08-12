@@ -210,25 +210,86 @@
 .ap-panel-foot a { color: var(--gold); }
 .ap-panel-foot a:hover { color: var(--gold-strong); text-decoration: underline; }
 
-/* site health */
-.ap-health {
-  border: 1px solid var(--line-soft); border-radius: 16px; overflow: hidden; background: var(--bg-2);
+/* site health dashboard */
+.ap-health-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ap-health-live {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted-2); border: 1px solid var(--line-soft); border-radius: 999px; padding: 6px 12px;
 }
-.ap-health-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 15px 20px; border-bottom: 1px solid var(--line-soft);
-  font-size: 0.9rem;
+.ap-health-live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--muted-2); }
+.ap-health-live.is-on::before { background: #4a9074; box-shadow: 0 0 8px rgba(74, 144, 116, 0.8); animation: ap-pulse 1.8s infinite; }
+@keyframes ap-pulse { 50% { opacity: 0.35; } }
+.ap-health-updated { font-size: 0.75rem; color: var(--muted-2); }
+.ap-refresh {
+  width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  border: 1px solid var(--line-soft); background: var(--bg-2); color: var(--muted);
+  font-size: 1rem; cursor: pointer; transition: border-color var(--tr), color var(--tr), transform var(--tr);
 }
-.ap-health-row:last-child { border-bottom: 0; }
-.ap-health-row > span:first-child { color: var(--muted); }
-.ap-dot { display: inline-flex; align-items: center; gap: 8px; color: var(--ivory); }
-.ap-dot::before {
-  content: ""; width: 9px; height: 9px; border-radius: 50%;
-  background: var(--muted-2);
+.ap-refresh:hover { border-color: var(--gold); color: var(--gold-strong); }
+.ap-refresh:active { transform: rotate(180deg); }
+
+.ap-metrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.ap-metric {
+  background: linear-gradient(180deg, var(--bg-2), #12100e);
+  border: 1px solid var(--line-soft); border-radius: 14px;
+  padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;
 }
-.ap-dot--green::before { background: #4a9074; box-shadow: 0 0 10px rgba(74, 144, 116, 0.7); }
-.ap-dot--gold::before { background: var(--gold); box-shadow: 0 0 10px rgba(178, 138, 84, 0.7); }
-.ap-dot--grey::before { background: var(--muted-2); }
+.ap-metric--wide { grid-column: 1 / -1; }
+.ap-metric-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ap-metric-name { font-family: var(--serif); font-size: 1.02rem; color: var(--ivory); }
+.ap-metric-dot {
+  display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
+  font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted-2); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line-soft);
+}
+.ap-metric-dot::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--muted-2); }
+.ap-metric-dot.is-ok { color: #bce5d6; border-color: rgba(74, 144, 116, 0.5); }
+.ap-metric-dot.is-ok::before { background: #4a9074; box-shadow: 0 0 8px rgba(74, 144, 116, 0.8); }
+.ap-metric-dot.is-warn { color: #f2cf9f; border-color: rgba(222, 150, 70, 0.55); }
+.ap-metric-dot.is-warn::before { background: var(--gold); box-shadow: 0 0 8px rgba(178, 138, 84, 0.8); }
+.ap-metric-dot.is-crit { color: #f0b8ad; border-color: rgba(190, 90, 70, 0.6); }
+.ap-metric-dot.is-crit::before { background: #be5a46; box-shadow: 0 0 8px rgba(190, 90, 70, 0.9); }
+
+.ap-gauge { position: relative; width: 128px; height: 128px; margin: 2px auto 0; }
+.ap-gauge svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ap-gauge-track { fill: none; stroke: rgba(178, 138, 84, 0.16); stroke-width: 9; }
+.ap-gauge-bar { fill: none; stroke: var(--muted-2); stroke-width: 9; stroke-linecap: round; transition: stroke 0.6s var(--ease), stroke-dashoffset 0.6s var(--ease); }
+.ap-gauge.is-ok .ap-gauge-bar { stroke: #4a9074; }
+.ap-gauge.is-warn .ap-gauge-bar { stroke: var(--gold); }
+.ap-gauge.is-crit .ap-gauge-bar { stroke: #be5a46; }
+.ap-gauge-num { position: absolute; inset: 0; display: grid; place-items: center; }
+.ap-gauge-num > span { text-align: center; }
+.ap-gauge-val { display: block; font-family: var(--serif); font-size: 1.9rem; color: var(--ivory); line-height: 1; }
+.ap-gauge-unit { display: block; margin-top: 3px; font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-2); }
+.ap-metric-note { text-align: center; font-size: 0.78rem; color: var(--muted-2); min-height: 1.1em; margin: 0; }
+
+.ap-metric-bar { height: 9px; border-radius: 999px; background: #16130f; border: 1px solid var(--line-soft); overflow: hidden; }
+.ap-metric-bar-fill {
+  display: block; height: 100%; width: 0%; border-radius: 999px;
+  background: var(--muted-2); transition: width 0.6s var(--ease), background 0.3s;
+}
+.ap-metric-bar-fill.is-ok { background: #4a9074; }
+.ap-metric-bar-fill.is-warn { background: var(--gold); }
+.ap-metric-bar-fill.is-crit { background: #be5a46; }
+
+.ap-metric-split { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 0.82rem; }
+.ap-metric-pct { font-family: var(--serif); font-size: 1.3rem; color: var(--gold-strong); }
+.ap-metric-src { font-size: 0.72rem; color: var(--muted-2); text-align: right; }
+
+.ap-metric-details {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  border-top: 1px solid var(--line-soft); padding-top: 12px;
+}
+.ap-metric-details > div { display: flex; flex-direction: column; gap: 3px; }
+.ap-metric-details span { font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-2); }
+.ap-metric-details strong { font-size: 0.9rem; color: var(--ivory); word-break: break-word; }
+
+.ap-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 16px; font-size: 0.76rem; color: var(--muted-2); }
+.ap-legend-item { display: inline-flex; align-items: center; gap: 7px; }
+.ap-legend-item::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #4a9074; }
+.ap-legend-item.is-warn::before { background: var(--gold); }
+.ap-legend-item.is-crit::before { background: #be5a46; }
 
 .ap-quick { margin-top: 26px; }
 .ap-quick-title { font-size: 1.1rem; color: var(--ivory); margin-bottom: 12px; }

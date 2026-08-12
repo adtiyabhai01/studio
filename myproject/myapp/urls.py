@@ -24,6 +24,7 @@ urlpatterns = [
 
     path("admin-portal/", views.admin_portal, name="admin_portal"),
     path("admin-portal/logout/", views.admin_portal_logout, name="admin_portal_logout"),
+    path("admin-portal/health/", views.portal_health, name="portal_health"),
 
     # Frontend content manager
     path("admin-portal/content/<slug:key>/", views.portal_content_list, name="portal_content_list"),

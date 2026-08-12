@@ -209,19 +209,136 @@
     </section>
 
     <!-- tab: site health -->
-    <section class="ap-panel" id="panel-site" data-panel="site" hidden>
+    <section class="ap-panel" id="panel-site" data-panel="site"
+             data-health-url="{% url 'main:portal_health' %}" hidden>
       <div class="ap-panel-head">
         <div>
           <h2 class="ap-panel-title">Site health</h2>
-          <p class="ap-panel-sub">Quick snapshot of what's live and what needs attention.</p>
+          <p class="ap-panel-sub">Live resource usage pulled from this server, the database and Cloudinary storage.</p>
+        </div>
+        <div class="ap-health-tools">
+          <span class="ap-health-live is-on" id="apHealthLive">● Live</span>
+          <span class="ap-health-updated" id="apHealthUpdated">—</span>
+          <button class="ap-refresh" id="apRefresh" type="button" title="Refresh now" aria-label="Refresh metrics">↻</button>
         </div>
       </div>
-      <div class="ap-health">
-        <div class="ap-health-row"><span>Active offers</span><span class="ap-dot {% if stats.offers %}ap-dot--green{% else %}ap-dot--grey{% endif %}">{{ stats.offers }} published</span></div>
-        <div class="ap-health-row"><span>Portfolio photos live</span><span class="ap-dot {% if stats.photos %}ap-dot--green{% else %}ap-dot--grey{% endif %}">{{ stats.photos }}</span></div>
-        <div class="ap-health-row"><span>Cities served</span><span class="ap-dot ap-dot--green">{{ stats.cities }}</span></div>
-        <div class="ap-health-row"><span>Enquiries awaiting response</span><span class="ap-dot {% if stats.enquiries_new %}ap-dot--gold{% else %}ap-dot--green{% endif %}">{{ stats.enquiries_new }} new</span></div>
+
+      <div class="ap-metrics" id="apMetrics">
+
+        <!-- CPU -->
+        <div class="ap-metric">
+          <div class="ap-metric-head">
+            <span class="ap-metric-name">CPU usage</span>
+            <span class="ap-metric-dot is-na" id="cpuStatus"><span class="ap-metric-dot-label">Unavailable</span></span>
+          </div>
+          <div class="ap-gauge is-na" id="cpuGauge">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="ap-gauge-track" cx="60" cy="60" r="52"></circle>
+              <circle class="ap-gauge-bar" id="cpuRing" cx="60" cy="60" r="52"
+                      style="stroke-dasharray:326.73;stroke-dashoffset:326.73;"></circle>
+            </svg>
+            <span class="ap-gauge-num"><span><span class="ap-gauge-val" id="cpuV">—</span><span class="ap-gauge-unit">% load</span></span></span>
+          </div>
+          <p class="ap-metric-note" id="cpuDetail">Sampling server load…</p>
+        </div>
+
+        <!-- GPU -->
+        <div class="ap-metric">
+          <div class="ap-metric-head">
+            <span class="ap-metric-name">GPU usage</span>
+            <span class="ap-metric-dot is-na" id="gpuStatus"><span class="ap-metric-dot-label">Unavailable</span></span>
+          </div>
+          <div class="ap-gauge is-na" id="gpuGauge">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="ap-gauge-track" cx="60" cy="60" r="52"></circle>
+              <circle class="ap-gauge-bar" id="gpuRing" cx="60" cy="60" r="52"
+                      style="stroke-dasharray:326.73;stroke-dashoffset:326.73;"></circle>
+            </svg>
+            <span class="ap-gauge-num"><span><span class="ap-gauge-val" id="gpuV">—</span><span class="ap-gauge-unit">% load</span></span></span>
+          </div>
+          <p class="ap-metric-note" id="gpuDetail">Checking for a GPU…</p>
+        </div>
+
+        <!-- Database storage -->
+        <div class="ap-metric">
+          <div class="ap-metric-head">
+            <span class="ap-metric-name">Database storage</span>
+            <span class="ap-metric-dot is-na" id="dbStatus"><span class="ap-metric-dot-label">Unavailable</span></span>
+          </div>
+          <div class="ap-metric-bar"><span class="ap-metric-bar-fill is-na" id="dbBar"></span></div>
+          <div class="ap-metric-split">
+            <span class="ap-metric-pct" id="dbPct">—</span>
+            <span class="ap-metric-src" id="dbSource">—</span>
+          </div>
+          <div class="ap-metric-details">
+            <div><span>Used</span><strong id="dbUsed">—</strong></div>
+            <div><span>Total</span><strong id="dbTotal">—</strong></div>
+            <div><span>Available</span><strong id="dbAvail">—</strong></div>
+          </div>
+        </div>
+
+        <!-- Photo storage -->
+        <div class="ap-metric">
+          <div class="ap-metric-head">
+            <span class="ap-metric-name">Photo storage</span>
+            <span class="ap-metric-dot is-na" id="phStatus"><span class="ap-metric-dot-label">Unavailable</span></span>
+          </div>
+          <div class="ap-metric-bar"><span class="ap-metric-bar-fill is-na" id="phBar"></span></div>
+          <div class="ap-metric-split">
+            <span class="ap-metric-pct" id="phPct">—</span>
+            <span class="ap-metric-src" id="phSource">—</span>
+          </div>
+          <div class="ap-metric-details">
+            <div><span>Used</span><strong id="phUsed">—</strong></div>
+            <div><span>Total</span><strong id="phTotal">—</strong></div>
+            <div><span>Available</span><strong id="phAvail">—</strong></div>
+          </div>
+        </div>
+
+        <!-- Video storage -->
+        <div class="ap-metric">
+          <div class="ap-metric-head">
+            <span class="ap-metric-name">Video storage</span>
+            <span class="ap-metric-dot is-na" id="vdStatus"><span class="ap-metric-dot-label">Unavailable</span></span>
+          </div>
+          <div class="ap-metric-bar"><span class="ap-metric-bar-fill is-na" id="vdBar"></span></div>
+          <div class="ap-metric-split">
+            <span class="ap-metric-pct" id="vdPct">—</span>
+            <span class="ap-metric-src" id="vdSource">—</span>
+          </div>
+          <div class="ap-metric-details">
+            <div><span>Used</span><strong id="vdUsed">—</strong></div>
+            <div><span>Total</span><strong id="vdTotal">—</strong></div>
+            <div><span>Available</span><strong id="vdAvail">—</strong></div>
+          </div>
+        </div>
+
+        <!-- Overall storage -->
+        <div class="ap-metric ap-metric--wide">
+          <div class="ap-metric-head">
+            <span class="ap-metric-name">Overall storage</span>
+            <span class="ap-metric-dot is-na" id="ovStatus"><span class="ap-metric-dot-label">Unavailable</span></span>
+          </div>
+          <div class="ap-metric-bar"><span class="ap-metric-bar-fill is-na" id="ovBar"></span></div>
+          <div class="ap-metric-split">
+            <span class="ap-metric-pct" id="ovPct">—</span>
+            <span class="ap-metric-src" id="ovSource">Database + Cloudinary media</span>
+          </div>
+          <div class="ap-metric-details">
+            <div><span>Used</span><strong id="ovUsed">—</strong></div>
+            <div><span>Total</span><strong id="ovTotal">—</strong></div>
+            <div><span>Available</span><strong id="ovAvail">—</strong></div>
+          </div>
+        </div>
+
       </div>
+
+      <div class="ap-legend">
+        <span class="ap-legend-item">Green · Normal</span>
+        <span class="ap-legend-item is-warn">Yellow · Warning</span>
+        <span class="ap-legend-item is-crit">Red · Critical</span>
+      </div>
+
       <div class="ap-quick">
         <h3 class="ap-quick-title">Make it live</h3>
         <div class="ap-quick-row">
@@ -364,6 +481,7 @@
 
 {% endif %}
 
+  <script>window.AP_HEALTH = {{ health_json|default:"null"|safe }};</script>
   <script src="{% static 'js/admin_portal.js' %}"></script>
 </body>
 </html>

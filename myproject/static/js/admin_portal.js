@@ -24,6 +24,11 @@
         panel.classList.toggle("is-active", on);
         panel.hidden = !on;
       });
+      if (key === "site") {
+        startHealthPolling();
+      } else {
+        stopHealthPolling();
+      }
     }
 
     tabs.forEach(function (tab) {
@@ -219,5 +224,169 @@
         });
       });
     });
+
+    /* ---------- site health dashboard ---------- */
+    var healthPanel = document.getElementById("panel-site");
+    var HEALTH_LABELS = {
+      ok: ["is-ok", "Normal"],
+      warn: ["is-warn", "Warning"],
+      crit: ["is-crit", "Critical"],
+      na: ["is-na", "Unavailable"]
+    };
+
+    function fmtBytes(n) {
+      if (n === null || n === undefined || isNaN(n)) return "—";
+      var units = ["B", "KB", "MB", "GB", "TB"];
+      var v = Number(n);
+      var u = 0;
+      while (v >= 1024 && u < units.length - 1) {
+        v /= 1024;
+        u++;
+      }
+      return v.toFixed(u === 0 || v >= 100 ? 0 : 1) + " " + units[u];
+    }
+
+    function setHealthText(id, txt) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = txt === null || txt === undefined || txt === "" ? "—" : txt;
+    }
+
+    function setHealthStatus(id, level) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      var s = HEALTH_LABELS[level] || HEALTH_LABELS.na;
+      el.className = "ap-metric-dot " + s[0];
+      var label = el.querySelector(".ap-metric-dot-label");
+      if (label) label.textContent = s[1];
+    }
+
+    function renderGauge(gaugeId, ringId, pct, available) {
+      var gauge = document.getElementById(gaugeId);
+      var ring = document.getElementById(ringId);
+      if (!gauge && !ring) return;
+      var c = 326.725;
+      var p = available && pct !== null && pct !== undefined ? Math.max(0, Math.min(100, pct)) : 0;
+      if (ring) {
+        ring.style.strokeDasharray = c.toFixed(2);
+        ring.style.strokeDashoffset = (c * (1 - p / 100)).toFixed(2);
+      }
+    }
+
+    function applyHealthGauge(prefix, d) {
+      var ok = d && d.available && d.percent !== null && d.percent !== undefined;
+      var pct = ok ? d.percent : 0;
+      var level = d ? d.level : "na";
+      renderGauge(prefix + "Gauge", prefix + "Ring", pct, ok);
+      setHealthText(prefix + "V", ok ? Math.round(pct) + "" : "—");
+      if (ok) {
+        setHealthStatus(prefix + "Status", level);
+      } else {
+        setHealthStatus(prefix + "Status", "na");
+      }
+    }
+
+    function applyHealthStorage(d, prefix, key) {
+      var r = (d && d[key]) || null;
+      var level = r ? r.level : "na";
+      var pct = r && r.percent !== null && r.percent !== undefined ? r.percent : 0;
+      setHealthText(prefix + "Pct", r && r.percent !== null && r.percent !== undefined ? Math.round(r.percent) + "%" : "—");
+      setHealthText(prefix + "Used", fmtBytes(r && r.used));
+      setHealthText(prefix + "Total", fmtBytes(r && r.total));
+      setHealthText(prefix + "Avail", fmtBytes(r && r.available));
+      setHealthStatus(prefix + "Status", level);
+      var bar = document.getElementById(prefix + "Bar");
+      if (bar) {
+        bar.className = "ap-metric-bar-fill " + (HEALTH_LABELS[level] ? level : "is-na");
+        bar.style.width = Math.max(0, Math.min(100, pct)).toFixed(2) + "%";
+      }
+      var src = document.getElementById(prefix + "Source");
+      if (src) src.textContent = (r && r.engine) || "—";
+    }
+
+    function applyHealth(d) {
+      if (!d || typeof d !== "object") return;
+      var cpu = d.cpu || {};
+      if (cpu.available && cpu.percent !== null && cpu.percent !== undefined) {
+        setHealthText("cpuDetail", (cpu.cores ? cpu.cores + " logical cores · " : "") + "current server load");
+      } else {
+        setHealthText("cpuDetail", cpu.error || "CPU monitoring unavailable");
+      }
+      applyHealthGauge("cpu", cpu);
+
+      var gpu = d.gpu || {};
+      if (gpu.available && gpu.percent !== null && gpu.percent !== undefined) {
+        setHealthText("gpuDetail", (gpu.name ? gpu.name + " · " : "") + "GPU load");
+      } else {
+        setHealthText("gpuDetail", gpu.error || "No GPU available on this host");
+      }
+      applyHealthGauge("gpu", gpu);
+
+      applyHealthStorage(d, "db", "database");
+      applyHealthStorage(d, "ph", "photos");
+      applyHealthStorage(d, "vd", "videos");
+
+      var ov = d.overall || null;
+      applyHealthStorage(d, "ov", "overall");
+      setHealthText("ovSource", (ov && ov.limit ? "Database + Cloudinary media" : "Not enough data to compute"));
+
+      var updated = document.getElementById("apHealthUpdated");
+      if (updated && d.generated_at) {
+        updated.textContent = "Updated " + new Date(d.generated_at).toLocaleTimeString();
+      }
+    }
+
+    var healthUrl = healthPanel ? (healthPanel.dataset.healthUrl || "/admin-portal/health/") : null;
+    var healthTimer = null;
+
+    function healthTick() {
+      if (!healthUrl) return;
+      var pill = document.getElementById("apHealthLive");
+      if (pill) {
+        pill.textContent = "● Updating";
+        pill.className = "ap-health-live is-on";
+      }
+      fetch(healthUrl, {
+        credentials: "same-origin",
+        headers: { Accept: "application/json" }
+      }).then(function (res) {
+        if (res.status === 403) throw new Error("Unauthorized");
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.json();
+      }).then(function (data) {
+        if (data && data.error) throw new Error(data.error);
+        applyHealth(data);
+        if (pill) {
+          pill.textContent = "● Live";
+          pill.className = "ap-health-live is-on";
+        }
+      }).catch(function () {
+        if (pill) {
+          pill.textContent = "● Offline";
+          pill.className = "ap-health-live";
+        }
+      });
+    }
+
+    function startHealthPolling() {
+      if (!healthUrl || healthTimer) return;
+      healthTick();
+      healthTimer = setInterval(healthTick, 15000);
+    }
+
+    function stopHealthPolling() {
+      if (healthTimer) {
+        clearInterval(healthTimer);
+        healthTimer = null;
+      }
+    }
+
+    if (healthPanel) {
+      var refreshBtn = document.getElementById("apRefresh");
+      if (refreshBtn) refreshBtn.addEventListener("click", healthTick);
+    }
+
+    // Paint the first snapshot served with the page, then keep it live.
+    if (window.AP_HEALTH) applyHealth(window.AP_HEALTH);
+    if (params.get("tab") === "site") startHealthPolling();
   });
 })();
