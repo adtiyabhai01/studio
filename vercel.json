@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "installCommand": "pip install --break-system-packages -r requirements.txt && python myproject/manage.py collectstatic --noinput",
+  "installCommand": "pip install --break-system-packages -r requirements.txt && python myproject/manage.py migrate --noinput && python myproject/manage.py collectstatic --noinput",
   "builds": [
     {
       "src": "api/index.py",
