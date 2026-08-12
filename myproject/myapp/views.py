@@ -648,8 +648,8 @@ def _portal_cloudinary_config():
     from django.conf import settings
 
     return {
-        "cloud_name": settings.CLOUDINARY_STORAGE.get("CLOUD_NAME", ""),
-        "upload_preset": getattr(settings, "CLOUDINARY_UPLOAD_PRESET", ""),
+        "cloudName": settings.CLOUDINARY_STORAGE.get("CLOUD_NAME", ""),
+        "uploadPreset": getattr(settings, "CLOUDINARY_UPLOAD_PRESET", ""),
     }
 
 

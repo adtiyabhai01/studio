@@ -87,6 +87,10 @@ class PortalModelForm(forms.ModelForm):
             widget = field.widget
             widget.attrs["accept"] = "video/*"
             widget.attrs["data-video-direct"] = "1"
+            # Embed the upload credentials directly on the input so the JS never
+            # depends on page order, caching or the json_script block.
+            widget.attrs["data-cloud-name"] = settings.CLOUDINARY_STORAGE.get("CLOUD_NAME", "")
+            widget.attrs["data-preset"] = getattr(settings, "CLOUDINARY_UPLOAD_PRESET", "")
             model_field = self._meta.model._meta.get_field(name)
             if isinstance(model_field.upload_to, str):
                 media_prefix = getattr(settings, "MEDIA_URL", "media/").strip("/")

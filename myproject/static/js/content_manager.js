@@ -243,6 +243,8 @@
           if (el) {
             try { cfg = JSON.parse(el.textContent) || {}; } catch (err) {}
           }
+          if (cfg.cloud_name && !cfg.cloudName) cfg.cloudName = cfg.cloud_name;
+          if (cfg.upload_preset && !cfg.uploadPreset) cfg.uploadPreset = cfg.upload_preset;
           window.CLOUDINARY_CONFIG = cfg;
         }
         if (hidden) hidden.value = "";
