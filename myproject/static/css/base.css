@@ -94,6 +94,7 @@ h1 em, h2 em, h3 em { font-style: italic; color: var(--gold-strong); }
 .eyebrow--gold { color: var(--gold); }
 
 .section-head { max-width: 640px; margin-bottom: 48px; }
+.section-head--center { margin-inline: auto; text-align: center; }
 .section-head--justify {
   max-width: none;
   display: flex;
