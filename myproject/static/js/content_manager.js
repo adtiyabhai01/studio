@@ -212,7 +212,6 @@
     // in the hidden <name>_direct field, which the server saves as a reference.
     // Errors show the exact Cloudinary / network message on screen for easy fixing.
     function attachVideoDirect(input, form) {
-      var cfg = window.CLOUDINARY_CONFIG || {};
       var hidden = form.querySelector('[name="' + input.name + '_direct"]');
       var folder = input.dataset.folder || "videos";
 
@@ -238,6 +237,14 @@
 
       input.addEventListener("change", function () {
         var file = input.files && input.files[0];
+        var cfg = window.CLOUDINARY_CONFIG || {};
+        if (!cfg.cloudName) {
+          var el = document.getElementById("cdn-upload-config");
+          if (el) {
+            try { cfg = JSON.parse(el.textContent) || {}; } catch (err) {}
+          }
+          window.CLOUDINARY_CONFIG = cfg;
+        }
         if (hidden) hidden.value = "";
         if (!file) {
           if (!input.dataset.hasVideo) setStatus(input, "", false);
