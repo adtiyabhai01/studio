@@ -186,6 +186,8 @@
 
 .ap-help { margin-top: 6px; font-size: 0.78rem; color: var(--muted-2); line-height: 1.5; }
 .ap-error { margin-top: 6px; font-size: 0.8rem; color: #e0a393; }
+.ap-optimize { color: var(--gold-strong); }
+.ap-optimize.is-error { color: #e0a393; }
 
 /* checkboxes & switches */
 .ap-mfield--check > label { margin-bottom: 12px; }
