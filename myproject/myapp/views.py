@@ -579,6 +579,32 @@ def _portal_section(request, key):
     return section
 
 
+def portal_upload_debug(request):
+    """Show what the CURRENT deployed server reads for the upload config."""
+    can_manage = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+    if not can_manage:
+        raise Http404("Not found")
+
+    from django.conf import settings
+
+    cloud = settings.CLOUDINARY_STORAGE.get("CLOUD_NAME", "")
+    preset = getattr(settings, "CLOUDINARY_UPLOAD_PRESET", "")
+    return JsonResponse(
+        {
+            "cloud_name": cloud,
+            "cloud_name_set": bool(cloud),
+            "upload_preset": preset,
+            "upload_preset_set": bool(preset),
+            "remote_debug": True,
+            "hint": (
+                "If upload_preset_set is false here, the env var is missing from THIS deployment. "
+                "In Vercel add the variable individually (name must be exactly CLOUDINARY_UPLOAD_PRESET), "
+                "select Environment: Production, save, then Redeploy."
+            ),
+        }
+    )
+
+
 def portal_content_list(request, key):
     section = _portal_section(request, key)
 
