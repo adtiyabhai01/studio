@@ -116,6 +116,27 @@ class SiteSettings(TimeStampedModel):
         return base
 
 
+class SiteVisit(models.Model):
+    """One record per page view on the public site, so the studio can see who came."""
+
+    path = models.CharField(max_length=300)
+    ip = models.CharField(max_length=64, blank=True, default="")
+    city = models.CharField(max_length=120, blank=True, default="")
+    region = models.CharField(max_length=120, blank=True, default="")
+    country = models.CharField(max_length=120, blank=True, default="")
+    referrer = models.CharField(max_length=500, blank=True, default="")
+    user_agent = models.CharField(max_length=300, blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Site visit"
+        verbose_name_plural = "Site visits"
+
+    def __str__(self):
+        return f"{self.path} · {self.city or self.ip or 'direct'} · {self.created_at:%Y-%m-%d %H:%M}"
+
+
 HEADING_FONTS = [
     ("'Playfair Display', Georgia, serif", "Playfair Display"),
     ("'Cormorant Garamond', Georgia, serif", "Cormorant Garamond"),

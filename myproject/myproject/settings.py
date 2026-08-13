@@ -89,6 +89,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'myapp.middleware.MaintenanceModeMiddleware',
+    'myapp.middleware.VisitTrackingMiddleware',
     'myapp.middleware.ShowErrorsMiddleware',
 ]
 

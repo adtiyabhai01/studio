@@ -133,6 +133,7 @@
       <button class="ap-tab is-active" data-tab="enquiries">Enquiries</button>
       <button class="ap-tab" data-tab="manage">Manage Content</button>
       <button class="ap-tab" data-tab="site">Site Health</button>
+      <button class="ap-tab" data-tab="visitors">Visitors</button>
       <button class="ap-tab" data-tab="theme">Theme</button>
     </nav>
 
@@ -388,6 +389,59 @@
           </button>
         </form>
       </div>
+    </section>
+
+    <!-- tab: visitors -->
+    <section class="ap-panel" id="panel-visitors" data-panel="visitors" hidden>
+      <div class="ap-panel-head">
+        <div>
+          <h2 class="ap-panel-title">Visitors</h2>
+          <p class="ap-panel-sub">Who opened the site — recorded automatically on every page view.</p>
+        </div>
+      </div>
+
+      <div class="ap-stats ap-stats--small">
+        <div class="ap-stat"><span class="ap-stat-num">{{ visits_total }}</span><span class="ap-stat-label">Total page views</span></div>
+        <div class="ap-stat"><span class="ap-stat-num">{{ visits_today }}</span><span class="ap-stat-label">Views in last 24h</span></div>
+        <div class="ap-stat"><span class="ap-stat-num">{{ visitors_today }}</span><span class="ap-stat-label">Unique visitors (24h)</span></div>
+      </div>
+
+      {% if recent_visits %}
+        <div class="ap-table-wrap">
+          <table class="ap-table">
+            <thead>
+              <tr>
+                <th>When</th>
+                <th>Page</th>
+                <th>From</th>
+                <th>Referrer</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for visit in recent_visits %}
+                <tr>
+                  <td>{{ visit.created_at|date:"d M Y · H:i" }}</td>
+                  <td><strong>{{ visit.path }}</strong></td>
+                  <td>
+                    {% if visit.city or visit.country %}{{ visit.city|default:"—" }}{% if visit.region %}, {{ visit.region }}{% endif %}{% if visit.country %} · {{ visit.country }}{% endif %}{% else %}—{% endif %}
+                    <span class="ap-cell-sub">{{ visit.ip|default:"" }}</span>
+                  </td>
+                  <td>
+                    {% if visit.referrer %}
+                      <span class="ap-cell-sub" title="{{ visit.referrer }}">{{ visit.referrer }}</span>
+                    {% else %}
+                      <span class="ap-cell-sub">direct</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="ap-panel-foot">Bots and admin browsing are filtered out automatically. Old records are cleaned up after 60 days.</p>
+      {% else %}
+        <p class="ap-empty">No visits recorded yet — as soon as someone opens the website, their visits will appear here.</p>
+      {% endif %}
     </section>
 
     <!-- tab: theme -->

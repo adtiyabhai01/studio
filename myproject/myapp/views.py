@@ -61,6 +61,7 @@ from .models import (
     PortfolioVideo,
     Service,
     SiteSettings,
+    SiteVisit,
     TeamMember,
     Testimonial,
     ThemeSettings,
@@ -426,7 +427,14 @@ STATUS_COLOR = {
 
 
 def _portal_context(request):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
     enquiries = Enquiry.objects.all()
+    today_start = timezone.now() - timedelta(hours=24)
+    visits_qs = SiteVisit.objects.all()
+    recent_visits = list(visits_qs[:20])
     context = {
         "portal_user": request.user,
         "portal_links": PORTAL_LINKS,
@@ -443,6 +451,10 @@ def _portal_context(request):
             "testimonials": Testimonial.objects.count(),
             "cities": City.objects.filter(is_active=True).count(),
         },
+        "visits_total": visits_qs.count(),
+        "visits_today": visits_qs.filter(created_at__gte=today_start).count(),
+        "visitors_today": visits_qs.filter(created_at__gte=today_start).values("ip").distinct().count(),
+        "recent_visits": recent_visits,
         "recent_enquiries": list(enquiries.select_related("service")[:8]),
         "budget_map": dict(BUDGET_CHOICES),
         "theme": ThemeSettings.load(),
