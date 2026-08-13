@@ -139,6 +139,7 @@
     pauseAllPreviews();
     if (lightboxStage) lightboxStage.innerHTML = "";
     document.body.style.overflow = "";
+    resumeGridVideos();
   }
 
   function stepMedia(dir) {
@@ -161,51 +162,77 @@
     });
   }
 
-  /* ---------- hover preview for films in the mixed grid (desktop) ---------- */
-  var finePointer =
-    window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-  var videoFigures = Array.prototype.slice.call(
+  /* ---------- inline autoplay for films in the mixed grid ----------
+     Grid films autoplay muted + looped as soon as they enter the viewport
+     (desktop and mobile) — no click needed. Tapping one opens the fullscreen
+     lightbox with sound for full playback. */
+  var gridVideoItems = Array.prototype.slice.call(
     document.querySelectorAll(".g-item--video")
   );
 
-  videoFigures.forEach(function (fig) {
+  gridVideoItems.forEach(function (fig) {
     var src = fig.getAttribute("data-video-src") || "";
     var poster = fig.querySelector(".g-item-img--video");
-    var previewVideo = null;
+    var posterSrc = poster && poster.tagName === "IMG" ? poster.getAttribute("src") : "";
+    if (!src || fig.getAttribute("data-embed")) return;
 
-    if (!(finePointer && src && !fig.getAttribute("data-embed"))) return;
-
-    fig.addEventListener("mouseenter", function () {
-      if (!previewVideo) {
-        previewVideo = document.createElement("video");
-        previewVideo.className = "v-preview";
-        previewVideo.muted = true;
-        previewVideo.loop = true;
-        previewVideo.playsInline = true;
-        previewVideo.setAttribute("playsinline", "");
-        previewVideo.preload = "none";
-        if (poster) previewVideo.setAttribute("poster", poster.getAttribute("src") || "");
-        previewVideo.src = src;
-        fig.appendChild(previewVideo);
-      }
-      fig.classList.add("is-previewing");
-      var p = previewVideo.play();
-      if (p && p.catch) {
-        p.catch(function () {
-          previewVideo.addEventListener("loadedmetadata", function onReady() {
-            previewVideo.removeEventListener("loadedmetadata", onReady);
-            var q = previewVideo.play();
-            if (q && q.catch) q.catch(function () {});
-          });
-        });
-      }
-    });
-
-    fig.addEventListener("mouseleave", function () {
-      fig.classList.remove("is-previewing");
-      if (previewVideo) previewVideo.pause();
-    });
+    var video = document.createElement("video");
+    video.className = "v-preview";
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.setAttribute("playsinline", "");
+    video.preload = "none";
+    if (posterSrc) video.setAttribute("poster", posterSrc);
+    video.src = src;
+    fig.appendChild(video);
   });
+
+  function playGridVideo(fig) {
+    var v = fig.querySelector(".v-preview");
+    if (!v) return;
+    fig.classList.add("is-previewing");
+    v.preload = "auto";
+    var p = v.play();
+    if (p && p.catch) {
+      p.catch(function () {
+        v.addEventListener("loadedmetadata", function onReady() {
+          v.removeEventListener("loadedmetadata", onReady);
+          var q = v.play();
+          if (q && q.catch) q.catch(function () {});
+        });
+      });
+    }
+  }
+
+  function resumeGridVideos() {
+    gridVideoItems.forEach(function (fig) {
+      var v = fig.querySelector(".v-preview");
+      if (!v) return;
+      var r = fig.getBoundingClientRect();
+      if (r.top < window.innerHeight && r.bottom > 0) playGridVideo(fig);
+    });
+  }
+
+  if ("IntersectionObserver" in window && gridVideoItems.length) {
+    var gridIo = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        var v = entry.target.querySelector(".v-preview");
+        if (!v) return;
+        if (entry.isIntersecting) {
+          playGridVideo(entry.target);
+        } else {
+          entry.target.classList.remove("is-previewing");
+          v.pause();
+        }
+      });
+    }, { rootMargin: "250px 0px", threshold: 0.1 });
+    gridVideoItems.forEach(function (fig) { gridIo.observe(fig); });
+  } else if (gridVideoItems.length) {
+    gridVideoItems.forEach(function (fig) {
+      if (!fig.getAttribute("data-embed")) playGridVideo(fig);
+    });
+  }
 
   /* ---------- autoplay film cards on service pages ----------
      Uploaded films and YouTube clips autoplay muted + looped while in view,
