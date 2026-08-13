@@ -81,58 +81,90 @@
     });
   }
 
-  /* ---------- video modal ---------- */
-  var videoCards = Array.prototype.slice.call(document.querySelectorAll(".v-card"));
-  var videoModal = document.getElementById("videoModal");
-  var videoModalFrame = document.getElementById("videoModalFrame");
-  var videoModalClose = document.getElementById("videoModalClose");
+  /* ---------- autoplay video cards ----------
+     Uploaded films and YouTube clips autoplay muted + looped while in view,
+     so no click is required to start playback. Videos only load as they
+     approach the viewport (desktop and mobile) to avoid unnecessary lag. */
+  function setupVideoCards() {
+    var cards = Array.prototype.slice.call(document.querySelectorAll(".v-card"));
+    if (!cards.length) return;
 
-  function openVideoModal(card) {
-    if (!videoModal || !videoModalFrame) return;
-    videoModalFrame.innerHTML = "";
-    var embedId = card.getAttribute("data-video") || "";
-    var src = card.getAttribute("data-src") || "";
-    if (embedId) {
-      var iframe = document.createElement("iframe");
-      iframe.src = "https://www.youtube.com/embed/" + embedId + "?autoplay=1&rel=0";
-      iframe.setAttribute("frameborder", "0");
-      iframe.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture");
-      iframe.setAttribute("allowfullscreen", "");
-      videoModalFrame.appendChild(iframe);
-    } else if (src) {
-      var videoEl = document.createElement("video");
-      videoEl.src = src;
-      videoEl.controls = true;
-      videoEl.autoplay = true;
-      videoModalFrame.appendChild(videoEl);
-    } else {
-      return;
+    var mediaEls = cards.map(function (card) {
+      var media = card.querySelector(".v-media");
+      var src = card.getAttribute("data-src") || "";
+      var embedId = card.getAttribute("data-video") || "";
+
+      if (!media) return null;
+
+      if (src) {
+        var poster = media.querySelector("img, .v-img--mono");
+        var video = document.createElement("video");
+        video.className = "v-video";
+        video.muted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.setAttribute("playsinline", "");
+        video.preload = "none";
+        if (poster && poster.tagName === "IMG") {
+          video.setAttribute("poster", poster.getAttribute("src") || "");
+        }
+        media.innerHTML = "";
+        media.appendChild(video);
+        card.classList.add("v-card--inline");
+        return video;
+      }
+
+      if (embedId) {
+        var holder = document.createElement("div");
+        holder.className = "v-embed";
+        media.innerHTML = "";
+        media.appendChild(holder);
+        card.classList.add("v-card--inline");
+        return holder;
+      }
+
+      return null;
+    });
+
+    function activate(el, card) {
+      if (!el) return;
+      if (el.tagName === "VIDEO") {
+        el.preload = "auto";
+        var p = el.play();
+        if (p && p.catch) p.catch(function () {});
+      } else if (el.classList && el.classList.contains("v-embed") && !el.getAttribute("data-loaded")) {
+        var id = card.getAttribute("data-video") || "";
+        var titleEl = card.querySelector(".v-title");
+        el.setAttribute("data-loaded", "1");
+        el.innerHTML = '<iframe src="https://www.youtube.com/embed/' +
+          encodeURIComponent(id) +
+          '?autoplay=1&mute=1&loop=1&playlist=' + encodeURIComponent(id) +
+          '&controls=0&playsinline=1&rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen title="' +
+          (titleEl ? titleEl.textContent.replace(/"/g, "&quot;") : "Video") +
+          '"></iframe>';
+      }
     }
-    videoModal.classList.add("is-open");
-    videoModal.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
+
+    if ("IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          var idx = cards.indexOf(entry.target);
+          var el = mediaEls[idx];
+          if (entry.isIntersecting) {
+            activate(el, entry.target);
+          } else if (el && el.tagName === "VIDEO") {
+            el.pause();
+          }
+        });
+      }, { rootMargin: "250px 0px", threshold: 0.1 });
+
+      cards.forEach(function (card) { io.observe(card); });
+    } else {
+      cards.forEach(function (card, i) { activate(mediaEls[i], card); });
+    }
   }
 
-  function closeVideoModal() {
-    if (!videoModal) return;
-    videoModal.classList.remove("is-open");
-    videoModal.setAttribute("aria-hidden", "true");
-    if (videoModalFrame) videoModalFrame.innerHTML = "";
-    document.body.style.overflow = "";
-  }
-
-  videoCards.forEach(function (card) {
-    card.addEventListener("click", function () {
-      openVideoModal(card);
-    });
-  });
-
-  if (videoModalClose) videoModalClose.addEventListener("click", closeVideoModal);
-  if (videoModal) {
-    videoModal.addEventListener("click", function (e) {
-      if (e.target === videoModal) closeVideoModal();
-    });
-  }
+  setupVideoCards();
 
   /* ---------- keyboard ---------- */
   document.addEventListener("keydown", function (e) {
@@ -140,8 +172,6 @@
       if (e.key === "Escape") closeLightbox();
       if (e.key === "ArrowRight") stepLightbox(1);
       if (e.key === "ArrowLeft") stepLightbox(-1);
-    } else if (videoModal && videoModal.classList.contains("is-open")) {
-      if (e.key === "Escape") closeVideoModal();
     }
   });
 })();

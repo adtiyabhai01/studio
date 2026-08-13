@@ -106,11 +106,18 @@
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 32px;
 }
-.v-card { cursor: pointer; }
+.v-card { cursor: default; }
 .v-media { position: relative; overflow: hidden; aspect-ratio: 16 / 9; border-radius: 3px; display: grid; place-items: center; }
 .v-media img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s var(--ease); }
 .v-card:hover .v-media img { transform: scale(1.06); }
 .v-img--mono { display: grid; place-items: center; width: 100%; height: 100%; background: linear-gradient(150deg, #2a241d, #15130f); font-family: var(--serif); font-size: 3rem; color: var(--gold); }
+.v-media .v-video {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  background: #000;
+  transition: transform 1s var(--ease);
+}
+.v-card:hover .v-video { transform: scale(1.03); }
+.v-media .v-embed, .v-media .v-embed iframe { width: 100%; height: 100%; display: block; border: 0; }
 .v-play {
   position: absolute; inset: 0; margin: auto;
   width: 66px; height: 66px; border-radius: 50%;
