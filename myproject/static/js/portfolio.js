@@ -105,6 +105,7 @@
         video.playsInline = true;
         video.setAttribute("playsinline", "");
         video.preload = "none";
+        video.src = src;
         if (poster && poster.tagName === "IMG") {
           video.setAttribute("poster", poster.getAttribute("src") || "");
         }
@@ -131,7 +132,15 @@
       if (el.tagName === "VIDEO") {
         el.preload = "auto";
         var p = el.play();
-        if (p && p.catch) p.catch(function () {});
+        if (p && p.catch) {
+          p.catch(function () {
+            el.addEventListener("loadedmetadata", function onReady() {
+              el.removeEventListener("loadedmetadata", onReady);
+              var q = el.play();
+              if (q && q.catch) q.catch(function () {});
+            });
+          });
+        }
       } else if (el.classList && el.classList.contains("v-embed") && !el.getAttribute("data-loaded")) {
         var id = card.getAttribute("data-video") || "";
         var titleEl = card.querySelector(".v-title");
