@@ -156,6 +156,14 @@
 .ap-row.is-filtered { display: none; }
 .ap-row.is-flash { background: rgba(178, 138, 84, 0.14); }
 .ap-cell-sub { display: block; font-size: 0.78rem; color: var(--muted); margin-top: 3px; min-height: 1em; }
+.ap-device {
+  display: inline-block; padding: 4px 12px; border-radius: 999px;
+  font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+  border: 1px solid var(--line-soft); color: var(--muted);
+}
+.ap-device--mobile { border-color: rgba(217, 189, 139, 0.4); color: #e5c79b; }
+.ap-device--tablet { border-color: rgba(122, 162, 190, 0.45); color: #a9c7dd; }
+.ap-device--desktop { border-color: rgba(74, 144, 116, 0.45); color: #bce5d6; }
 .ap-manage-link { color: var(--gold); }
 .ap-manage-link:hover { color: var(--gold-strong); text-decoration: underline; }
 .ap-empty {

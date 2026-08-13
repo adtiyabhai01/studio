@@ -117,24 +117,36 @@ class SiteSettings(TimeStampedModel):
 
 
 class SiteVisit(models.Model):
-    """One record per page view on the public site, so the studio can see who came."""
+    """One record per unique visitor (deduped by visitor_id) so page refreshes
+    don't create duplicate rows. Pages visited are appended to a list."""
 
-    path = models.CharField(max_length=300)
+    visitor_id = models.CharField(max_length=64, blank=True, default="", db_index=True)
     ip = models.CharField(max_length=64, blank=True, default="")
+    device_type = models.CharField(max_length=20, blank=True, default="", help_text="Mobile / Tablet / Desktop")
+    os = models.CharField(max_length=80, blank=True, default="")
+    browser = models.CharField(max_length=80, blank=True, default="")
+    screen = models.CharField(max_length=40, blank=True, default="", help_text="Screen resolution, e.g. 1920x1080")
+    pages = models.JSONField(default=list, blank=True)
     city = models.CharField(max_length=120, blank=True, default="")
     region = models.CharField(max_length=120, blank=True, default="")
     country = models.CharField(max_length=120, blank=True, default="")
     referrer = models.CharField(max_length=500, blank=True, default="")
-    user_agent = models.CharField(max_length=300, blank=True, default="")
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, help_text="First visit time")
+    last_seen = models.DateTimeField(default=timezone.now, db_index=True)
 
     class Meta:
-        ordering = ["-created_at"]
-        verbose_name = "Site visit"
-        verbose_name_plural = "Site visits"
+        ordering = ["-last_seen"]
+        verbose_name = "Site visitor"
+        verbose_name_plural = "Site visitors"
 
     def __str__(self):
-        return f"{self.path} · {self.city or self.ip or 'direct'} · {self.created_at:%Y-%m-%d %H:%M}"
+        return f"{self.ip or 'anon'} · {self.device_type or 'Unknown'} · {self.last_seen:%Y-%m-%d %H:%M}"
+
+    def page_count(self):
+        return len(self.pages or [])
+
+    def pages_preview(self):
+        return ", ".join(self.pages or [])
 
 
 HEADING_FONTS = [

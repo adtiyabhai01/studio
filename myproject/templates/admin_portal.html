@@ -411,36 +411,49 @@
           <table class="ap-table">
             <thead>
               <tr>
-                <th>When</th>
-                <th>Page</th>
-                <th>From</th>
-                <th>Referrer</th>
+                <th>IP Address</th>
+                <th>Device</th>
+                <th>OS · Browser</th>
+                <th>Screen</th>
+                <th>Visit Time</th>
+                <th>Pages</th>
               </tr>
             </thead>
             <tbody>
               {% for visit in recent_visits %}
                 <tr>
-                  <td>{{ visit.created_at|date:"d M Y · H:i" }}</td>
-                  <td><strong>{{ visit.path }}</strong></td>
                   <td>
-                    {% if visit.city or visit.country %}{{ visit.city|default:"—" }}{% if visit.region %}, {{ visit.region }}{% endif %}{% if visit.country %} · {{ visit.country }}{% endif %}{% else %}—{% endif %}
-                    <span class="ap-cell-sub">{{ visit.ip|default:"" }}</span>
+                    <strong>{{ visit.ip|default:"—" }}</strong>
+                    <span class="ap-cell-sub">
+                      {% if visit.city or visit.country %}{{ visit.city|default:"—" }}{% if visit.region %}, {{ visit.region }}{% endif %}{% if visit.country %} · {{ visit.country }}{% endif %}{% endif %}
+                      {% if visit.referrer %} · from {{ visit.referrer }}{% endif %}
+                    </span>
                   </td>
                   <td>
-                    {% if visit.referrer %}
-                      <span class="ap-cell-sub" title="{{ visit.referrer }}">{{ visit.referrer }}</span>
-                    {% else %}
-                      <span class="ap-cell-sub">direct</span>
-                    {% endif %}
+                    {% if visit.device_type %}
+                      <span class="ap-device ap-device--{{ visit.device_type|lower }}">{{ visit.device_type }}</span>
+                    {% else %}—{% endif %}
+                  </td>
+                  <td>
+                    <strong>{{ visit.os|default:"—" }}</strong>
+                    <span class="ap-cell-sub">{{ visit.browser|default:"" }}</span>
+                  </td>
+                  <td>{{ visit.screen|default:"—" }}</td>
+                  <td>
+                    {{ visit.last_seen|date:"d M Y · H:i" }}
+                    <span class="ap-cell-sub">first {{ visit.created_at|date:"d M H:i" }}</span>
+                  </td>
+                  <td>
+                    <span class="ap-cell-sub" title="{{ visit.pages_preview }}">{{ visit.page_count }} page{{ visit.page_count|pluralize }}</span>
                   </td>
                 </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
-        <p class="ap-panel-foot">Bots and admin browsing are filtered out automatically. Old records are cleaned up after 60 days.</p>
+        <p class="ap-panel-foot">One row per unique visitor — refreshes update the same record, so no duplicates. Bots and admin browsing are filtered automatically.</p>
       {% else %}
-        <p class="ap-empty">No visits recorded yet — as soon as someone opens the website, their visits will appear here.</p>
+        <p class="ap-empty">No visitors recorded yet — as soon as someone opens the website, they'll appear here.</p>
       {% endif %}
     </section>
 

@@ -22,6 +22,7 @@ urlpatterns = [
 
     path("theme.json", views.theme_json, name="theme_json"),
     path("maintenance/mode/", views.maintenance_status, name="maintenance_status"),
+    path("api/visitor/", views.visitor_track, name="visitor_track"),
 
     path("admin-portal/", views.admin_portal, name="admin_portal"),
     path("admin-portal/logout/", views.admin_portal_logout, name="admin_portal_logout"),

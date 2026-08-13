@@ -210,6 +210,34 @@
     }, 15000);
   })();
 
+  // Visitor tracking — posts a stable visitor_id + screen resolution once per
+  // page load. The server dedupes, so refreshes never create duplicate rows.
+  (function visitorTrack() {
+    var KEY = "chamunda_visitor_id";
+    var vid = null;
+    try {
+      vid = localStorage.getItem(KEY);
+      if (!vid) {
+        vid = "v" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem(KEY, vid);
+      }
+    } catch (e) {
+      vid = "";
+    }
+    var body = JSON.stringify({
+      visitor_id: vid,
+      screen: window.screen && window.screen.width ? window.screen.width + "x" + window.screen.height : "",
+      path: window.location.pathname + window.location.search,
+      referrer: document.referrer || ""
+    });
+    fetch("/api/visitor/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
+      body: body,
+      keepalive: true
+    }).catch(function () {});
+  })();
+
   // Live maintenance mode — when the admin flips it on in the portal, every
   // already-open tab shows the maintenance screen instantly (no refresh needed).
   (function maintenanceWatch() {

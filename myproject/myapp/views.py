@@ -1,6 +1,7 @@
 import json
 import re
 import urllib.parse
+import urllib.request
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -8,12 +9,196 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 
 from .content import CONTENT_SECTIONS
 from .health import HEALTH_LABELS, build_health_report
 from .maintenance import maintenance_enabled
 
 HEX_COLOR_RE = re.compile(r"^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$")
+
+_LOCATION_CACHE = {}
+_LOCATION_CACHE_SIZE = 256
+
+
+def _client_ip(request):
+    """Best-effort public IP, honouring proxy headers (Vercel sets X-Forwarded-For)."""
+    ip = request.META.get("HTTP_X_FORWARDED_FOR") or request.META.get("REMOTE_ADDR") or ""
+    return ip.split(",")[0].strip()[:64]
+
+
+def lookup_location(ip):
+    """Best-effort city/country from the IP via ip-api.com (free, no key)."""
+    if not ip or ip in ("127.0.0.1", "::1", "localhost"):
+        return "", "", ""
+    if ip in _LOCATION_CACHE:
+        return _LOCATION_CACHE[ip]
+    try:
+        with urllib.request.urlopen(
+            f"http://ip-api.com/json/{ip}?fields=status,city,region,country", timeout=2
+        ) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        if data.get("status") == "success":
+            result = (data.get("city", "") or "", data.get("region", "") or "", data.get("country", "") or "")
+        else:
+            result = ("", "", "")
+    except Exception:
+        result = ("", "", "")
+    if len(_LOCATION_CACHE) < _LOCATION_CACHE_SIZE:
+        _LOCATION_CACHE[ip] = result
+    return result
+
+
+def parse_user_agent(ua):
+    """Return (device_type, os, browser) from a User-Agent string."""
+    ua = (ua or "")
+    low = ua.lower()
+
+    if any(x in low for x in ("ipad", "tablet", "playbook", "silk", "kindle")) or (
+        "android" in low and "mobile" not in low
+    ):
+        device = "Tablet"
+    elif any(x in low for x in ("mobile", "iphone", "ipod", "android", "windows phone", "blackberry", "iemobile")):
+        device = "Mobile"
+    else:
+        device = "Desktop"
+
+    if "windows" in low:
+        os_name = "Windows"
+    elif "android" in low:
+        os_name = "Android"
+    elif "iphone" in low or "ipad" in low or "ipod" in low:
+        os_name = "iOS"
+    elif "mac os" in low or "macintosh" in low:
+        os_name = "macOS"
+    elif "cros" in low or "chromebook" in low:
+        os_name = "Chrome OS"
+    elif "linux" in low:
+        os_name = "Linux"
+    else:
+        os_name = ""
+
+    if "edg/" in low or "edge/" in low:
+        browser = "Edge"
+    elif "opr/" in low or "opera" in low or "opios" in low:
+        browser = "Opera"
+    elif "samsungbrowser" in low:
+        browser = "Samsung Internet"
+    elif "crios" in low or "fxios" in low:
+        browser = "Safari"
+    elif "chrome" in low:
+        browser = "Chrome"
+    elif "firefox" in low:
+        browser = "Firefox"
+    elif "safari" in low:
+        browser = "Safari"
+    else:
+        browser = ""
+
+    return device, os_name, browser
+
+
+def record_visit(request, visitor_id="", screen="", path="", referrer=""):
+    """Create or update the visitor's row. Same visitor_id (from localStorage)
+    updates the existing record instead of creating duplicates."""
+    from .models import SiteVisit
+
+    ip = _client_ip(request)
+    city, region, country = lookup_location(ip)
+    device, os_name, browser = parse_user_agent(request.META.get("HTTP_USER_AGENT", ""))
+
+    visit = None
+    if visitor_id:
+        visit = SiteVisit.objects.filter(visitor_id=visitor_id).first()
+    if visit is None and not visitor_id and ip:
+        # No JS/ID available — dedupe by IP within a short window.
+        visit = SiteVisit.objects.filter(ip=ip).order_by("-last_seen").first()
+        if visit is not None and (timezone.now() - visit.last_seen).total_seconds() > 1800:
+            visit = None
+
+    if visit is None:
+        visit = SiteVisit(
+            visitor_id=visitor_id,
+            ip=ip,
+            city=city,
+            region=region,
+            country=country,
+            device_type=device,
+            os=os_name,
+            browser=browser,
+            screen=screen,
+            pages=[path] if path else [],
+            referrer=referrer,
+            last_seen=timezone.now(),
+        )
+    else:
+        if visitor_id and not visit.visitor_id:
+            visit.visitor_id = visitor_id
+        if device:
+            visit.device_type = device
+        if os_name:
+            visit.os = os_name
+        if browser:
+            visit.browser = browser
+        if screen:
+            visit.screen = screen
+        if city and not visit.city:
+            visit.city, visit.region, visit.country = city, region, country
+        if referrer and not visit.referrer:
+            visit.referrer = referrer
+        pages = list(visit.pages or [])
+        if path and path not in pages:
+            pages.append(path)
+            visit.pages = pages[-100:]
+        visit.last_seen = timezone.now()
+
+    try:
+        visit.save()
+        _prune_old_visits()
+    except Exception:
+        pass
+
+
+_LAST_PRUNE = [0.0]
+
+
+def _prune_old_visits():
+    """Keep the table small — rows untouched for 60 days or beyond 5000 latest."""
+    import time
+
+    from .models import SiteVisit
+
+    now = time.time()
+    if now - _LAST_PRUNE[0] < 3600:
+        return
+    _LAST_PRUNE[0] = now
+    cutoff = timezone.now() - timezone.timedelta(days=60)
+    SiteVisit.objects.filter(last_seen__lt=cutoff).delete()
+    ids = list(SiteVisit.objects.order_by("-id").values_list("id", flat=True)[5000:])
+    if ids:
+        SiteVisit.objects.filter(id__in=ids).delete()
+
+
+@csrf_exempt
+def visitor_track(request):
+    """Beacon endpoint called by the site's JS on every page load.
+
+    Carries a stable visitor_id (localStorage) + screen resolution so the
+    server can deduplicate and enrich the visitor record without any login.
+    """
+    if request.method != "POST":
+        return JsonResponse({"ok": False, "error": "POST only"}, status=405)
+    try:
+        data = json.loads(request.body or b"{}") if request.body else {}
+    except Exception:
+        data = {}
+    visitor_id = str(data.get("visitor_id") or "").strip()[:64]
+    screen = str(data.get("screen") or "").strip()[:40]
+    path = str(data.get("path") or request.path or "/").strip()[:300]
+    referrer = str(data.get("referrer") or "").strip()[:500]
+    record_visit(request, visitor_id=visitor_id, screen=screen, path=path, referrer=referrer)
+    return JsonResponse({"ok": True})
 
 THEME_COLOR_KEYS = [
     "background", "background_secondary", "ink", "ink_secondary",
@@ -427,12 +612,8 @@ STATUS_COLOR = {
 
 
 def _portal_context(request):
-    from datetime import timedelta
-
-    from django.utils import timezone
-
     enquiries = Enquiry.objects.all()
-    today_start = timezone.now() - timedelta(hours=24)
+    today_start = timezone.now() - timezone.timedelta(hours=24)
     visits_qs = SiteVisit.objects.all()
     recent_visits = list(visits_qs[:20])
     context = {
@@ -452,8 +633,8 @@ def _portal_context(request):
             "cities": City.objects.filter(is_active=True).count(),
         },
         "visits_total": visits_qs.count(),
-        "visits_today": visits_qs.filter(created_at__gte=today_start).count(),
-        "visitors_today": visits_qs.filter(created_at__gte=today_start).values("ip").distinct().count(),
+        "visits_today": visits_qs.filter(last_seen__gte=today_start).count(),
+        "visitors_today": visits_qs.filter(last_seen__gte=today_start).values("ip").distinct().count(),
         "recent_visits": recent_visits,
         "recent_enquiries": list(enquiries.select_related("service")[:8]),
         "budget_map": dict(BUDGET_CHOICES),
