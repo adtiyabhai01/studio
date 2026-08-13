@@ -88,6 +88,11 @@ class SiteSettings(TimeStampedModel):
     hero_fallback = models.ImageField(
         upload_to="site/", blank=True, null=True, help_text="Fallback hero image when no video is available."
     )
+    maintenance_mode = models.BooleanField(
+        default=False,
+        help_text="When enabled, visitors see a maintenance screen across the whole site. "
+        "Admins stay logged in and can switch it back off.",
+    )
 
     class Meta:
         verbose_name = "Site Settings"

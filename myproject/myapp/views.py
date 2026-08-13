@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .content import CONTENT_SECTIONS
 from .health import HEALTH_LABELS, build_health_report
+from .maintenance import maintenance_enabled
 
 HEX_COLOR_RE = re.compile(r"^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$")
 
@@ -447,6 +448,7 @@ def _portal_context(request):
         "theme": ThemeSettings.load(),
         "heading_fonts": HEADING_FONTS,
         "body_fonts": BODY_FONTS,
+        "maintenance_mode": SiteSettings.load().maintenance_mode,
         "theme_presets": [
             {
                 "key": p["key"],
@@ -513,6 +515,14 @@ def admin_portal(request):
                 messages.success(request, "Enquiry status updated.")
             return redirect("main:admin_portal")
 
+        if action == "maintenance" and request.user.is_authenticated:
+            site_settings = SiteSettings.load()
+            site_settings.maintenance_mode = not site_settings.maintenance_mode
+            site_settings.save()
+            state = "ON" if site_settings.maintenance_mode else "OFF"
+            messages.success(request, f"Maintenance mode is now {state} across the site.")
+            return redirect("main:admin_portal")
+
         if action == "theme" and request.user.is_authenticated:
             theme = ThemeSettings.load()
 
@@ -573,6 +583,11 @@ def portal_health(request):
     if not can_manage:
         return JsonResponse({"error": "unauthorized"}, status=403)
     return JsonResponse(build_health_report())
+
+
+def maintenance_status(request):
+    """Public JSON used by open pages to flip to/from the maintenance screen."""
+    return JsonResponse({"maintenance": maintenance_enabled()})
 
 
 # ---------------------------------------------------------------------------

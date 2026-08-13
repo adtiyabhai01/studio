@@ -347,6 +347,23 @@
           <a class="btn btn--ghost btn--sm" href="{% url 'main:portal_content_edit' 'site-settings' 1 %}">Edit site copy</a>
         </div>
       </div>
+
+      <div class="ap-maint">
+        <div class="ap-maint-copy">
+          <h3 class="ap-quick-title">Website maintenance</h3>
+          <p class="ap-maint-sub">
+            While <strong>ON</strong>, every visitor sees an "under maintenance" screen instead of the site —
+            already-open pages switch instantly. You stay logged in here to turn it back off.
+          </p>
+        </div>
+        <form method="post" action="{% url 'main:admin_portal' %}">
+          {% csrf_token %}
+          <input type="hidden" name="portal_action" value="maintenance">
+          <button type="submit" class="ap-maint-btn {% if maintenance_mode %}is-on{% endif %}">
+            {% if maintenance_mode %}Maintenance ON · tap to turn OFF{% else %}Maintenance OFF · tap to turn ON{% endif %}
+          </button>
+        </form>
+      </div>
     </section>
 
     <!-- tab: theme -->

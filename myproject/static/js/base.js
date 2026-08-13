@@ -209,4 +209,64 @@
       if (document.visibilityState === "visible") fetchTheme();
     }, 15000);
   })();
+
+  // Live maintenance mode — when the admin flips it on in the portal, every
+  // already-open tab shows the maintenance screen instantly (no refresh needed).
+  (function maintenanceWatch() {
+    var overlay = null;
+    var OVERLAY_GEAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>';
+
+    function brandName() {
+      var el = document.querySelector(".pre-name");
+      return el ? el.textContent.trim() : "";
+    }
+
+    function showOverlay() {
+      if (overlay || document.getElementById("maintScreen")) return;
+      overlay = document.createElement("div");
+      overlay.id = "maintScreen";
+      overlay.setAttribute("aria-live", "assertive");
+      overlay.innerHTML =
+        '<div class="maint-inner">' +
+        '<div class="maint-badge">' +
+        '<svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="52"></circle><circle class="bar" cx="60" cy="60" r="52"></circle></svg>' +
+        '<span class="maint-gear" aria-hidden="true">' + OVERLAY_GEAR + "</span>" +
+        "</div>" +
+        '<span class="maint-pill">Under maintenance</span>' +
+        '<h2 class="maint-title">We\'re fine-tuning <em>your stories</em></h2>' +
+        '<p class="maint-sub">The studio is temporarily paused for a quick polish. Every frame is safe — we\'ll be right back.</p>' +
+        '<p class="maint-dash maint-sub">Hold on&hellip;</p>' +
+        '<p class="maint-name">' + brandName() + "</p>" +
+        '<span class="maint-line"></span>' +
+        "</div>";
+      document.body.appendChild(overlay);
+      document.body.style.overflow = "hidden";
+    }
+
+    function hideOverlay() {
+      if (!overlay) return;
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      overlay = null;
+      document.body.style.overflow = "";
+    }
+
+    function poll() {
+      fetch("/maintenance/mode/", { headers: { "X-Requested-With": "XMLHttpRequest" } })
+        .then(function (res) {
+          if (!res.ok) throw new Error("status fetch failed");
+          return res.json();
+        })
+        .then(function (data) {
+          if (data && data.maintenance) showOverlay();
+          else hideOverlay();
+        })
+        .catch(function () {});
+    }
+
+    poll();
+    window.setInterval(poll, 10000);
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "visible") poll();
+    });
+  })();
 })();

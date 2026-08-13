@@ -295,6 +295,34 @@
 .ap-quick-title { font-size: 1.1rem; color: var(--ivory); margin-bottom: 12px; }
 .ap-quick-row { display: flex; flex-wrap: wrap; gap: 10px; }
 
+.ap-maint {
+  margin-top: 22px;
+  padding: 18px 20px;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  background: rgba(178, 138, 84, 0.05);
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px;
+}
+.ap-maint-copy { min-width: 240px; flex: 1 1 320px; }
+.ap-maint-copy .ap-quick-title { margin-bottom: 6px; }
+.ap-maint-sub { margin: 0; font-size: 0.86rem; line-height: 1.55; color: var(--muted); max-width: 56ch; }
+.ap-maint-btn {
+  cursor: pointer;
+  border: 1px solid rgba(178, 138, 84, 0.5);
+  border-radius: 999px;
+  padding: 11px 20px;
+  font-size: 0.76rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--gold); background: transparent;
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+.ap-maint-btn:hover { background: rgba(178, 138, 84, 0.14); }
+.ap-maint-btn.is-on {
+  background: rgba(217, 189, 139, 0.14);
+  border-color: var(--gold-strong);
+  color: var(--gold-strong);
+}
+.ap-maint-btn.is-on::before { content: "● "; color: #d9534f; }
+
 /* footer */
 .ap-foot {
   width: min(1200px, 94vw); margin-inline: auto;
