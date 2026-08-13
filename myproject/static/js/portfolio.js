@@ -1,90 +1,215 @@
-/* portfolio.js — gallery filtering, lightbox, video modal.
-   Loaded on the portfolio page AND the service pages (shared gallery). */
+/* portfolio.js — gallery filtering, premium media lightbox, autoplay films.
+   Loaded on the portfolio page AND the service pages (shared media). */
 (function () {
   "use strict";
 
-  /* ---------- category filtering ---------- */
-  var filterButtons = Array.prototype.slice.call(document.querySelectorAll("#portfolioFilter .filter"));
-  var items = Array.prototype.slice.call(document.querySelectorAll(".portfolio-grid .g-item"));
+  /* ---------- category filtering (portfolio + service pages) ---------- */
+  var filterBars = Array.prototype.slice.call(document.querySelectorAll(".filterbar"));
+  filterBars.forEach(function (bar) {
+    var buttons = Array.prototype.slice.call(bar.querySelectorAll(".filter"));
+    var grids = Array.prototype.slice.call(document.querySelectorAll("[data-filter-grid]"));
+    var items = [];
 
-  if (filterButtons.length && items.length) {
-    filterButtons.forEach(function (btn) {
+    grids.forEach(function (grid) {
+      Array.prototype.slice.call(grid.querySelectorAll("[data-cat]")).forEach(function (el) {
+        items.push(el);
+      });
+      if (!grid.querySelector(".g-empty")) {
+        var empty = document.createElement("p");
+        empty.className = "g-empty is-hidden";
+        empty.textContent = "Nothing in this category yet — check back soon.";
+        grid.appendChild(empty);
+      }
+    });
+
+    if (!buttons.length || !items.length) return;
+
+    buttons.forEach(function (btn) {
       btn.addEventListener("click", function () {
-        var f = btn.getAttribute("data-filter");
-        filterButtons.forEach(function (b) {
+        var f = btn.getAttribute("data-filter") || "all";
+        buttons.forEach(function (b) {
           b.classList.toggle("filter--active", b === btn);
         });
         items.forEach(function (item) {
           var cat = item.getAttribute("data-cat") || "all";
           var show = f === "all" || cat === f;
           item.classList.toggle("is-hidden", !show);
+          if (show) item.classList.add("is-shown");
+          else item.classList.remove("is-shown");
+        });
+        grids.forEach(function (grid) {
+          var emptyEl = grid.querySelector(".g-empty");
+          var shown = grid.querySelectorAll("[data-cat]:not(.is-hidden)").length;
+          if (emptyEl) emptyEl.classList.toggle("is-hidden", shown > 0);
         });
       });
     });
-  }
+  });
 
-  /* ---------- lightbox ---------- */
+  /* ---------- unified media index (photos + films, DOM order) ---------- */
   var lightbox = document.getElementById("lightbox");
+  var lightboxStage = document.getElementById("lightboxStage");
   var lightboxImg = document.getElementById("lightboxImg");
   var lightboxCap = document.getElementById("lightboxCap");
   var lightboxClose = document.getElementById("lightboxClose");
   var lightboxPrev = document.getElementById("lightboxPrev");
   var lightboxNext = document.getElementById("lightboxNext");
 
-  var galleryLinks = Array.prototype.slice.call(document.querySelectorAll("[data-lightbox]"));
-  var itemsData = galleryLinks.map(function (el) {
-    return {
-      src: el.getAttribute("data-lightbox"),
-      caption: el.getAttribute("data-caption"),
-    };
-  });
+  var mediaItems = Array.prototype.slice
+    .call(document.querySelectorAll("figure.g-item"))
+    .filter(function (fig) {
+      return fig.querySelector("[data-lightbox]") || fig.classList.contains("g-item--video");
+    })
+    .map(function (fig) {
+      var btn = fig.querySelector("[data-lightbox]");
+      if (btn) {
+        return {
+          type: "photo",
+          src: btn.getAttribute("data-lightbox"),
+          caption: btn.getAttribute("data-caption") || "",
+          fig: fig,
+        };
+      }
+      return {
+        type: "video",
+        src: fig.getAttribute("data-video-src") || "",
+        embed: fig.getAttribute("data-embed") || "",
+        caption: fig.getAttribute("data-caption") || "",
+        fig: fig,
+      };
+    });
+
   var currentIndex = 0;
 
-  function openLightbox(index) {
-    var data = itemsData[index];
-    if (!data) return;
-    currentIndex = index;
-    lightboxImg.src = data.src;
-    lightboxImg.alt = data.caption || "";
-    if (lightboxCap) lightboxCap.textContent = data.caption || "";
-    if (lightbox) {
-      lightbox.classList.add("is-open");
-      lightbox.setAttribute("aria-hidden", "false");
-      document.body.style.overflow = "hidden";
-    }
+  function pauseAllPreviews() {
+    document.querySelectorAll(".g-item--video.is-previewing").forEach(function (el) {
+      el.classList.remove("is-previewing");
+      var v = el.querySelector(".v-preview");
+      if (v) v.pause();
+    });
   }
 
-  function closeLightbox() {
+  function openMedia(index) {
+    var item = mediaItems[index];
+    if (!item || !lightbox || !lightboxStage) return;
+    currentIndex = index;
+    pauseAllPreviews();
+
+    lightboxStage.innerHTML = "";
+    if (item.type === "photo") {
+      lightbox.classList.remove("is-video");
+      lightboxStage.appendChild(lightboxImg);
+      lightboxImg.src = item.src;
+      lightboxImg.alt = item.caption || "";
+      if (lightboxCap) lightboxCap.textContent = item.caption || "";
+    } else {
+      lightbox.classList.add("is-video");
+      if (lightboxCap) lightboxCap.textContent = item.caption || "";
+      var media;
+      if (item.embed) {
+        media = document.createElement("iframe");
+        media.setAttribute("frameborder", "0");
+        media.setAttribute(
+          "allow",
+          "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        );
+        media.setAttribute("allowfullscreen", "");
+        media.src =
+          "https://www.youtube.com/embed/" + encodeURIComponent(item.embed) + "?autoplay=1&rel=0";
+      } else if (item.src) {
+        media = document.createElement("video");
+        media.controls = true;
+        media.loop = true;
+        media.autoplay = true;
+        media.setAttribute("playsinline", "");
+        media.src = item.src;
+      }
+      if (media) lightboxStage.appendChild(media);
+    }
+
+    lightbox.classList.add("is-open");
+    lightbox.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeMedia() {
     if (!lightbox) return;
     lightbox.classList.remove("is-open");
     lightbox.setAttribute("aria-hidden", "true");
+    pauseAllPreviews();
+    if (lightboxStage) lightboxStage.innerHTML = "";
     document.body.style.overflow = "";
   }
 
-  function stepLightbox(dir) {
-    if (!itemsData.length) return;
-    openLightbox((currentIndex + dir + itemsData.length) % itemsData.length);
+  function stepMedia(dir) {
+    if (!mediaItems.length) return;
+    openMedia((currentIndex + dir + mediaItems.length) % mediaItems.length);
   }
 
-  galleryLinks.forEach(function (el, i) {
-    el.addEventListener("click", function () {
-      openLightbox(i);
+  mediaItems.forEach(function (item, i) {
+    item.fig.addEventListener("click", function () {
+      openMedia(i);
     });
   });
 
-  if (lightboxClose) lightboxClose.addEventListener("click", closeLightbox);
-  if (lightboxPrev) lightboxPrev.addEventListener("click", function () { stepLightbox(-1); });
-  if (lightboxNext) lightboxNext.addEventListener("click", function () { stepLightbox(1); });
+  if (lightboxClose) lightboxClose.addEventListener("click", closeMedia);
+  if (lightboxPrev) lightboxPrev.addEventListener("click", function () { stepMedia(-1); });
+  if (lightboxNext) lightboxNext.addEventListener("click", function () { stepMedia(1); });
   if (lightbox) {
     lightbox.addEventListener("click", function (e) {
-      if (e.target === lightbox) closeLightbox();
+      if (e.target === lightbox) closeMedia();
     });
   }
 
-  /* ---------- autoplay video cards ----------
+  /* ---------- hover preview for films in the mixed grid (desktop) ---------- */
+  var finePointer =
+    window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  var videoFigures = Array.prototype.slice.call(
+    document.querySelectorAll(".g-item--video")
+  );
+
+  videoFigures.forEach(function (fig) {
+    var src = fig.getAttribute("data-video-src") || "";
+    var poster = fig.querySelector(".g-item-img--video");
+    var previewVideo = null;
+
+    if (!(finePointer && src && !fig.getAttribute("data-embed"))) return;
+
+    fig.addEventListener("mouseenter", function () {
+      if (!previewVideo) {
+        previewVideo = document.createElement("video");
+        previewVideo.className = "v-preview";
+        previewVideo.muted = true;
+        previewVideo.loop = true;
+        previewVideo.playsInline = true;
+        previewVideo.setAttribute("playsinline", "");
+        previewVideo.preload = "none";
+        if (poster) previewVideo.setAttribute("poster", poster.getAttribute("src") || "");
+        previewVideo.src = src;
+        fig.appendChild(previewVideo);
+      }
+      fig.classList.add("is-previewing");
+      var p = previewVideo.play();
+      if (p && p.catch) {
+        p.catch(function () {
+          previewVideo.addEventListener("loadedmetadata", function onReady() {
+            previewVideo.removeEventListener("loadedmetadata", onReady);
+            var q = previewVideo.play();
+            if (q && q.catch) q.catch(function () {});
+          });
+        });
+      }
+    });
+
+    fig.addEventListener("mouseleave", function () {
+      fig.classList.remove("is-previewing");
+      if (previewVideo) previewVideo.pause();
+    });
+  });
+
+  /* ---------- autoplay film cards on service pages ----------
      Uploaded films and YouTube clips autoplay muted + looped while in view,
-     so no click is required to start playback. Videos only load as they
-     approach the viewport (desktop and mobile) to avoid unnecessary lag. */
+     so no click is required. Videos only load as they approach the viewport. */
   function setupVideoCards() {
     var cards = Array.prototype.slice.call(document.querySelectorAll(".v-card"));
     if (!cards.length) return;
@@ -178,9 +303,9 @@
   /* ---------- keyboard ---------- */
   document.addEventListener("keydown", function (e) {
     if (lightbox && lightbox.classList.contains("is-open")) {
-      if (e.key === "Escape") closeLightbox();
-      if (e.key === "ArrowRight") stepLightbox(1);
-      if (e.key === "ArrowLeft") stepLightbox(-1);
+      if (e.key === "Escape") closeMedia();
+      if (e.key === "ArrowRight") stepMedia(1);
+      if (e.key === "ArrowLeft") stepMedia(-1);
     }
   });
 })();

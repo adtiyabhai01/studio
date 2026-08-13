@@ -47,7 +47,8 @@
       <p class="eyebrow eyebrow--gold">Baby gallery</p>
       <h2 class="section-title">Gummies, yawns &amp; <em>little frowns</em></h2>
     </header>
-    <div class="masonry">
+    {% include "partials/filter_bar.html" with filter_categories=media_categories %}
+    <div class="masonry" data-filter-grid>
       {% for image in images|slice:":8" %}
         {% include "partials/gallery_item.html" with image=image %}
       {% endfor %}
@@ -66,9 +67,9 @@
       <p class="eyebrow eyebrow--gold">Baby films</p>
       <h2 class="section-title">A keepsake for <em>every age</em></h2>
     </header>
-    <div class="v-grid">
+    <div class="v-grid" data-filter-grid>
       {% for video in videos %}
-        <article class="v-card reveal" data-video="{{ video.embed_id|default:'' }}" data-src="{{ video.video.url|default:'' }}">
+        <article class="v-card reveal" data-cat="{{ video.category.slug|default:'all' }}" data-video="{{ video.embed_id|default:'' }}" data-src="{{ video.video.url|default:'' }}">
           <div class="v-media">
             {% if video.poster %}
               <img class="v-img" src="{{ video.poster.url }}" alt="{{ video.title }}" loading="lazy">

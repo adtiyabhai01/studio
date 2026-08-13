@@ -4,29 +4,7 @@
 
 .section--flow { background: var(--bg); }
 
-/* ---------- filter bar ---------- */
-
-.filterbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 44px;
-}
-.filter {
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted);
-  padding: 12px 22px;
-  border: 1px solid var(--line);
-  border-radius: 40px;
-  transition: color var(--tr), background var(--tr), border-color var(--tr);
-}
-.filter:hover { color: var(--ivory); border-color: var(--gold); }
-.filter--active { background: var(--gold); color: #171210; border-color: var(--gold); }
-
-/* ---------- masonry gallery ---------- */
+/* ---------- mixed photo + film grid ---------- */
 
 .portfolio-grid {
   columns: 3 300px;
@@ -42,9 +20,40 @@
   to { opacity: 1; transform: none; }
 }
 
-/* ---------- films section ---------- */
-
-#portfolio ~ .section--dark { background: var(--bg-2); }
+/* film cards inside the mixed grid */
+.g-item--video { aspect-ratio: 4 / 5; }
+.g-item--video .g-item-btn { position: relative; width: 100%; height: 100%; }
+.g-item--video .g-item-img--video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+.g-item--video .g-item-img--mono {
+  display: grid; place-items: center;
+  background: linear-gradient(150deg, #2a241d, #15130f);
+  font-family: var(--serif); font-size: 3rem; color: var(--gold);
+}
+.g-play {
+  position: absolute; left: 50%; top: 50%; translate: -50% -50%;
+  width: 58px; height: 58px; border-radius: 50%;
+  background: rgba(15, 13, 12, 0.55);
+  border: 1px solid rgba(217, 189, 139, 0.7);
+  color: var(--gold-strong);
+  font-size: 0.95rem; padding-left: 3px;
+  display: grid; place-items: center;
+  backdrop-filter: blur(4px);
+  transition: transform var(--tr), background var(--tr);
+  z-index: 2;
+  pointer-events: none;
+}
+.g-item--video:hover .g-play { background: var(--gold); color: #171210; transform: translate(-50%, -50%) scale(1.1); }
+.g-item--video .v-preview {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; opacity: 0;
+  transition: opacity 0.35s var(--ease);
+  z-index: 1;
+}
+.g-item--video.is-previewing .v-preview { opacity: 1; }
+.g-item--video.is-previewing .g-play { opacity: 0.25; }
 
 /* duplicate protection: after filtering, keep grid safe */
 .portfolio-grid:empty::after {

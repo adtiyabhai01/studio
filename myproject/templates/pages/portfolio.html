@@ -20,46 +20,37 @@
 
 <section class="section section--pad section--flow" id="portfolio">
   <div class="container">
-    <div class="filterbar reveal" id="portfolioFilter">
-      <button class="filter filter--active" data-filter="all">All</button>
-      {% for category in categories %}
-        <button class="filter" data-filter="{{ category.slug }}">{{ category.name }}</button>
-      {% endfor %}
-    </div>
+    <header class="section-head reveal">
+      <p class="eyebrow eyebrow--gold">The portfolio</p>
+      <h2 class="section-title">A gallery of <em>forever</em></h2>
+      <p class="section-sub">Photos &amp; films from real stories — hover a film to preview, tap it to watch full screen.</p>
+    </header>
 
-    <div class="portfolio-grid" id="portfolioGrid" data-count="{{ count }}">
+    {% include "partials/filter_bar.html" with filter_categories=categories %}
+
+    <div class="portfolio-grid" id="portfolioGrid" data-filter-grid data-count="{{ count }}">
       {% for image in images %}
         {% include "partials/gallery_item.html" with image=image %}
       {% endfor %}
-    </div>
-  </div>
-</section>
-
-{% if videos %}
-<section class="section section--pad section--dark">
-  <div class="container">
-    <header class="section-head reveal">
-      <p class="eyebrow eyebrow--gold">Moving pictures</p>
-      <h2 class="section-title">Films from <em>our desk</em></h2>
-    </header>
-    <div class="v-grid">
       {% for video in videos %}
-        <article class="v-card reveal" data-video="{{ video.embed_id|default:'' }}" data-src="{{ video.video.url|default:'' }}">
-          <div class="v-media">
+        <figure class="g-item g-item--video reveal" data-cat="{{ video.category.slug|default:'all' }}"
+                data-type="video" data-video-src="{{ video.video.url|default:'' }}"
+                data-embed="{{ video.embed_id|default:'' }}"
+                data-caption="{{ video.title|default:'Film' }}">
+          <button type="button" class="g-item-btn" aria-label="Watch {{ video.title|default:'film' }}">
             {% if video.poster %}
-              <img class="v-img" src="{{ video.poster.url }}" alt="{{ video.title }}" loading="lazy">
+              <img class="g-item-img g-item-img--video" src="{{ video.poster.url }}" alt="{{ video.title|default:'Film' }}" loading="lazy">
             {% else %}
-              <div class="v-img v-img--mono">{{ video.title|slice:":1" }}</div>
+              <div class="g-item-img g-item-img--video g-item-img--mono">{{ video.title|slice:":1" }}</div>
             {% endif %}
-            <button class="v-play" type="button" aria-label="Play {{ video.title }}">Play</button>
-          </div>
-          <h3 class="v-title">{{ video.title }}</h3>
-        </article>
+            <span class="g-play" aria-hidden="true">&#9654;</span>
+          </button>
+          <figcaption class="g-item-cap">{{ video.category.name|default:"Film" }}</figcaption>
+        </figure>
       {% endfor %}
     </div>
   </div>
 </section>
-{% endif %}
 
 {% include "partials/cta.html" %}
 

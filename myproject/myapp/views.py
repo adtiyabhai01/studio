@@ -188,6 +188,15 @@ def _service_page(request, slug):
         Testimonial.objects.filter(is_active=True, is_featured=True)
     )[:6]
 
+    # Categories actually present in this page's media, for the filter bar.
+    media_categories = []
+    seen_categories = set()
+    for obj in list(images) + list(videos):
+        category = obj.category
+        if category and category.id not in seen_categories:
+            seen_categories.add(category.id)
+            media_categories.append(category)
+
     context = {
         "active": "services",
         "parent_url": "/services/",
@@ -198,6 +207,7 @@ def _service_page(request, slug):
         "packages": packages[:4],
         "images": images,
         "videos": videos,
+        "media_categories": media_categories,
         "testimonials": testimonials,
         "hero_wa": _wa_link(f"Hi! I'm interested in your {heading} photography and videography."),
     }

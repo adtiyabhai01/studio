@@ -258,10 +258,13 @@
   display: none;
   align-items: center;
   justify-content: center;
-  background: rgba(8, 7, 6, 0.96);
+  background: rgba(5, 4, 3, 0.92);
+  backdrop-filter: blur(14px);
   padding: 4vh 4vw;
+  animation: lbFade 0.3s var(--ease) both;
 }
 .lightbox.is-open, .video-modal.is-open { display: flex; }
+@keyframes lbFade { from { opacity: 0; } to { opacity: 1; } }
 .lightbox-close {
   position: absolute; top: 18px; right: 22px; z-index: 5;
   font-size: 2.2rem; line-height: 1; color: var(--ivory);
@@ -271,7 +274,21 @@
 }
 .lightbox-close:hover { background: var(--gold); color: #171210; }
 .lightbox-frame { max-width: 1200px; max-height: 88vh; display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.lightbox-frame img { max-width: 90vw; max-height: 78vh; object-fit: contain; }
+.lightbox-stage {
+  display: flex; align-items: center; justify-content: center;
+  animation: lbZoom 0.45s var(--ease) both;
+}
+@keyframes lbZoom {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: none; }
+}
+.lightbox-stage img { max-width: 90vw; max-height: 78vh; object-fit: contain; }
+.lightbox.is-video .lightbox-stage { width: min(980px, 94vw); aspect-ratio: 16 / 9; }
+.lightbox.is-video .lightbox-stage video,
+.lightbox.is-video .lightbox-stage iframe {
+  width: 100%; height: 100%; object-fit: contain;
+  background: #000; border: 0; display: block;
+}
 .lightbox-frame figcaption { font-size: 0.85rem; color: var(--muted); text-align: center; }
 .lightbox-nav {
   position: absolute; top: 50%; translate: 0 -50%;
@@ -288,6 +305,37 @@
   width: 100%; height: 100%; object-fit: contain;
   background: #000; border: 0;
 }
+
+/* ---------- media filter bar (portfolio + service pages) ---------- */
+
+.filterbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 44px;
+}
+.filter {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 12px 22px;
+  border: 1px solid var(--line);
+  border-radius: 40px;
+  transition: color var(--tr), background var(--tr), border-color var(--tr);
+}
+.filter:hover { color: var(--ivory); border-color: var(--gold); }
+.filter--active { background: var(--gold); color: #171210; border-color: var(--gold); }
+
+[data-filter-grid] > .is-hidden { display: none; }
+.g-empty {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  text-align: center;
+  padding: 30px 0;
+}
+.g-empty.is-hidden { display: none; }
 
 /* ---------- media queries ---------- */
 

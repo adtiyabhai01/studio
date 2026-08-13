@@ -1,0 +1,6 @@
+<div class="filterbar reveal">
+  <button type="button" class="filter filter--active" data-filter="all">All</button>
+  {% for category in filter_categories %}
+    <button type="button" class="filter" data-filter="{{ category.slug }}">{{ category.name }}</button>
+  {% endfor %}
+</div>
