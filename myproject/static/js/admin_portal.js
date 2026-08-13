@@ -11,6 +11,35 @@
   }
 
   onReady(function () {
+    /* ---------- preloader (login page refresh animation) ---------- */
+    var pre = document.getElementById("preloader");
+    if (pre) {
+      var prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (prefersReducedMotion) {
+        pre.classList.add("is-done");
+      } else {
+        var MIN_SHOW = 1500;
+        var started = Date.now();
+        function hide() {
+          var wait = Math.max(0, MIN_SHOW - (Date.now() - started));
+          window.setTimeout(function () {
+            pre.classList.add("is-done");
+            pre.setAttribute("aria-hidden", "true");
+          }, wait);
+        }
+        if (document.readyState === "complete") {
+          hide();
+        } else {
+          window.addEventListener("load", hide);
+        }
+        window.setTimeout(function () {
+          if (!pre.classList.contains("is-done")) {
+            pre.classList.add("is-done");
+          }
+        }, 5000);
+      }
+    }
+
     /* ---------- tabs ---------- */
     var tabs = document.querySelectorAll(".ap-tab");
     var panels = document.querySelectorAll(".ap-panel");

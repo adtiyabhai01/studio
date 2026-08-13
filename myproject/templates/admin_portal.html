@@ -19,6 +19,30 @@
 
 {% if not portal_user.is_authenticated %}
 
+  {% if not login_error %}
+  <!-- ================= PRELOADER (plays on login page refresh) ================= -->
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="pre-inner">
+      <div class="pre-badge">
+        <svg class="pre-ring" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="pre-ring-track" cx="60" cy="60" r="52"></circle>
+          <circle class="pre-ring-bar" cx="60" cy="60" r="52"></circle>
+        </svg>
+        <span class="pre-mark">
+          {% if site.logo %}
+            <img class="pre-logo" src="{{ site.logo.url }}" alt="{{ site.brand_name }}">
+          {% else %}
+            {{ site.brand_name|slice:":1" }}
+          {% endif %}
+        </span>
+      </div>
+      <p class="pre-name">{{ site.brand_name }}</p>
+      <span class="pre-bar"><span class="pre-bar-fill"></span></span>
+      <p class="pre-caption">Entering the studio&hellip;</p>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- ================= LOGIN ================= -->
   <section class="ap-login">
     <div class="ap-login-card">
