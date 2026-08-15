@@ -155,6 +155,14 @@ HEADING_FONTS = [
     ("'Marcellus', Georgia, serif", "Marcellus"),
     ("'Libre Baskerville', Georgia, serif", "Libre Baskerville"),
     ("'EB Garamond', Georgia, serif", "EB Garamond"),
+    ("'Cinzel', Georgia, serif", "Cinzel"),
+    ("'Bodoni Moda', Georgia, serif", "Bodoni Moda"),
+    ("'Fraunces', Georgia, serif", "Fraunces"),
+    ("'Prata', Georgia, serif", "Prata"),
+    ("'Italiana', Georgia, serif", "Italiana"),
+    ("'Lora', Georgia, serif", "Lora"),
+    ("'Josefin Sans', 'Segoe UI', sans-serif", "Josefin Sans"),
+    ("'Tenor Sans', 'Segoe UI', sans-serif", "Tenor Sans"),
 ]
 
 BODY_FONTS = [
@@ -163,6 +171,14 @@ BODY_FONTS = [
     ("Inter, -apple-system, BlinkMacSystemFont, sans-serif", "Inter"),
     ("Jost, -apple-system, BlinkMacSystemFont, sans-serif", "Jost"),
     ("'Nunito Sans', -apple-system, BlinkMacSystemFont, sans-serif", "Nunito Sans"),
+    ("Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "Montserrat"),
+    ("'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "Open Sans"),
+    ("Lato, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "Lato"),
+    ("Raleway, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "Raleway"),
+    ("'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "Work Sans"),
+    ("'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "Plus Jakarta Sans"),
+    ("Outfit, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "Outfit"),
+    ("Mulish, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "Mulish"),
 ]
 
 DEFAULT_FONT_STACKS = {
