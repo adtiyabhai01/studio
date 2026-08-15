@@ -135,6 +135,7 @@
       <button class="ap-tab" data-tab="site">Site Health</button>
       <button class="ap-tab" data-tab="visitors">Visitors</button>
       <button class="ap-tab" data-tab="theme">Theme</button>
+      <button class="ap-tab" data-tab="logs">Logs</button>
     </nav>
 
     <!-- tab: enquiries -->
@@ -578,6 +579,91 @@
           <a class="ap-theme-cancel" href="/" target="_blank">Preview site ↗</a>
         </div>
       </form>
+    </section>
+
+    <!-- tab: logs -->
+    <section class="ap-panel" id="panel-logs" data-panel="logs" hidden>
+      <div class="ap-panel-head">
+        <div>
+          <h2 class="ap-panel-title">Error logs</h2>
+          <p class="ap-panel-sub">Every error, warning and failed request recorded automatically — open a row to read the full traceback.</p>
+        </div>
+        <div class="ap-log-tools">
+          <select class="field ap-filter" id="apLogLevel" aria-label="Filter by level">
+            <option value="">All levels</option>
+            <option value="ERROR">Errors</option>
+            <option value="CRITICAL">Critical</option>
+            <option value="WARNING">Warnings</option>
+            <option value="INFO">Info</option>
+          </select>
+          <input class="field ap-search" id="apLogSearch" type="search" placeholder="Search logs…" aria-label="Search logs">
+          <form method="post" action="{% url 'main:admin_portal' %}" data-keep-tab
+                onsubmit="return confirm('Delete all recorded error logs?');">
+            {% csrf_token %}
+            <input type="hidden" name="portal_action" value="clear_logs">
+            <button class="btn btn--ghost btn--sm" type="submit">Clear Logs</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="ap-stats ap-stats--small">
+        <div class="ap-stat"><span class="ap-stat-num">{{ logs_count.total }}</span><span class="ap-stat-label">Total log entries</span></div>
+        <div class="ap-stat"><span class="ap-stat-num">{{ logs_count.errors }}</span><span class="ap-stat-label">Errors</span></div>
+        <div class="ap-stat"><span class="ap-stat-num">{{ logs_count.warnings }}</span><span class="ap-stat-label">Warnings</span></div>
+      </div>
+
+      {% if recent_logs %}
+        <div class="ap-table-wrap">
+          <table class="ap-table" id="apLogTable">
+            <thead>
+              <tr>
+                <th>Level</th>
+                <th>Message</th>
+                <th>Path</th>
+                <th>Method</th>
+                <th>Status</th>
+                <th>When</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for log in recent_logs %}
+                <tr class="ap-row ap-log-row" data-level="{{ log.level }}" data-query="{{ log.message|lower }} {{ log.path|lower }} {{ log.status_code|default:'' }}" tabindex="0" role="button" aria-expanded="false">
+                  <td><span class="ap-log-level is-{{ log.level|lower }}">{{ log.level }}</span></td>
+                  <td>
+                    <span class="ap-log-detail-arrow" aria-hidden="true">+</span>
+                    <strong>{{ log.message|default:"—"|truncatechars:120 }}</strong>
+                    {% if log.user or log.ip %}
+                      <span class="ap-cell-sub">{% if log.user %}by {{ log.user }}{% endif %}{% if log.user and log.ip %} · {% endif %}{% if log.ip %}{{ log.ip }}{% endif %}</span>
+                    {% endif %}
+                  </td>
+                  <td class="ap-log-path">{{ log.path|default:"—" }}</td>
+                  <td>{{ log.method|default:"—" }}</td>
+                  <td>{{ log.status_code|default:"—" }}</td>
+                  <td>
+                    {{ log.created_at|date:"d M Y · H:i" }}
+                    <span class="ap-cell-sub">{{ log.created_at|timesince }} ago</span>
+                  </td>
+                </tr>
+                <tr class="ap-log-detail" data-level="{{ log.level }}" data-query="{{ log.message|lower }} {{ log.path|lower }} {{ log.status_code|default:'' }}" hidden>
+                  <td colspan="6">
+                    <div class="ap-log-detail-box">
+                      <p class="ap-log-meta">
+                        {{ log.method|default:"—" }} {{ log.path|default:"—" }}
+                        · status {{ log.status_code|default:"—" }}
+                        {% if log.user_agent %} · {{ log.user_agent|truncatechars:120 }}{% endif %}
+                      </p>
+                      <pre class="ap-log-trace">{{ log.traceback|default:"No traceback available." }}</pre>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="ap-panel-foot">Newest 50 entries shown. Errors are captured on every exception and on any 4xx/5xx response, and never interfere with the request that produced them.</p>
+      {% else %}
+        <p class="ap-empty">No errors recorded — nice and clean. The moment something goes wrong, the details will appear here.</p>
+      {% endif %}
     </section>
 
   </main>

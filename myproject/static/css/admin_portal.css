@@ -456,6 +456,42 @@
 .ap-theme-cancel { font-size: 0.82rem; color: var(--muted); margin-left: auto; }
 .ap-theme-cancel:hover { color: var(--gold-strong); }
 
+/* ---------- error logs tab ---------- */
+.ap-log-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ap-log-tools .ap-search { flex: 1 1 220px; }
+.ap-log-tools .ap-filter {
+  width: auto; background: #16130f; border: 1px solid var(--line); border-radius: 10px;
+  padding: 11px 12px; color: var(--ivory); font-size: 0.85rem; cursor: pointer;
+}
+.ap-log-tools .ap-filter option { background: #16130f; color: var(--ivory); }
+
+.ap-log-level {
+  display: inline-block; min-width: 74px; padding: 5px 12px; border-radius: 999px;
+  font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; text-align: center;
+  border: 1px solid; background: #16130f;
+}
+.ap-log-level.is-error { border-color: rgba(190, 90, 70, 0.7); color: #f0b8ad; }
+.ap-log-level.is-critical { border-color: #be5a46; color: #f4b3a8; background: rgba(190, 90, 70, 0.12); }
+.ap-log-level.is-warning { border-color: rgba(222, 150, 70, 0.7); color: #f2cf9f; }
+.ap-log-level.is-info { border-color: rgba(122, 162, 190, 0.45); color: #a9c7dd; }
+
+.ap-log-row { cursor: pointer; }
+.ap-log-detail { background: #12100e; }
+.ap-log-detail.is-filtered { display: none; }
+.ap-log-detail-box { padding: 6px 18px 18px; }
+.ap-log-meta { font-size: 0.78rem; color: var(--muted); margin-bottom: 10px; }
+.ap-log-trace {
+  margin: 0; padding: 14px 16px; border: 1px solid var(--line-soft); border-radius: 10px;
+  background: #0d0b09; color: #d9c9a8; font-size: 0.78rem; line-height: 1.6;
+  overflow-x: auto; white-space: pre-wrap; word-break: break-word;
+}
+.ap-log-path { font-family: var(--sans); color: var(--muted); word-break: break-word; }
+.ap-log-detail-arrow {
+  display: inline-block; margin-right: 8px; color: var(--gold); font-weight: 600;
+  transition: transform var(--tr);
+}
+.ap-log-row.is-open .ap-log-detail-arrow { transform: rotate(45deg); color: var(--gold-strong); }
+
 /* ---------- responsive ---------- */
 @media (max-width: 900px) {
   .ap-stats { grid-template-columns: repeat(3, 1fr); }

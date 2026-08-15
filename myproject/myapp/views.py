@@ -239,6 +239,7 @@ from .models import (
     HEADING_FONTS,
     City,
     Enquiry,
+    ErrorLog,
     HeroVideo,
     Offer,
     Package,
@@ -638,6 +639,12 @@ def _portal_context(request):
         "visitors_today": visits_qs.filter(last_seen__gte=today_start).values("ip").distinct().count(),
         "recent_visits": recent_visits,
         "recent_enquiries": list(enquiries.select_related("service")[:8]),
+        "recent_logs": list(ErrorLog.objects.all()[:50]),
+        "logs_count": {
+            "total": ErrorLog.objects.count(),
+            "errors": ErrorLog.objects.filter(level__in=["ERROR", "CRITICAL"]).count(),
+            "warnings": ErrorLog.objects.filter(level="WARNING").count(),
+        },
         "budget_map": dict(BUDGET_CHOICES),
         "theme": ThemeSettings.load(),
         "heading_fonts": HEADING_FONTS,
@@ -687,7 +694,7 @@ def _portal_redirect(request):
     """Redirect back to admin portal preserving the active tab the user was on,
     so actions (maintenance toggle, theme save) don't bounce to the default tab."""
     tab = request.POST.get("tab", "")
-    if tab in {"enquiries", "manage", "site", "visitors", "theme"}:
+    if tab in {"enquiries", "manage", "site", "visitors", "theme", "logs"}:
         return redirect(reverse("main:admin_portal") + "?tab=" + tab)
     return redirect("main:admin_portal")
 
@@ -724,6 +731,11 @@ def admin_portal(request):
             site_settings.save()
             state = "ON" if site_settings.maintenance_mode else "OFF"
             messages.success(request, f"Maintenance mode is now {state} across the site.")
+            return _portal_redirect(request)
+
+        if action == "clear_logs" and request.user.is_authenticated:
+            ErrorLog.objects.all().delete()
+            messages.success(request, "Error logs cleared.")
             return _portal_redirect(request)
 
         if action == "theme" and request.user.is_authenticated:

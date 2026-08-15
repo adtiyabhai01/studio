@@ -720,3 +720,40 @@ class HeroVideo(models.Model):
 
     def __str__(self):
         return self.title or f"Hero video #{self.pk}"
+
+
+# ---------------------------------------------------------------------------
+# Error logs (shown in the admin portal's Logs tab)
+# ---------------------------------------------------------------------------
+
+
+class ErrorLog(models.Model):
+    """One error / warning record per row, captured automatically whenever the
+    site raises an exception or returns an HTTP 4xx/5xx response. Reviewable in
+    the admin portal and never breaks the request that produced the error."""
+
+    LEVEL_CHOICES = [
+        ("CRITICAL", "Critical"),
+        ("ERROR", "Error"),
+        ("WARNING", "Warning"),
+        ("INFO", "Info"),
+    ]
+
+    level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default="ERROR", db_index=True)
+    message = models.TextField(blank=True, help_text="Short, human-readable description.")
+    traceback = models.TextField(blank=True, help_text="Full Python traceback, when available.")
+    path = models.CharField(max_length=500, blank=True, default="", help_text="URL that triggered the error.")
+    method = models.CharField(max_length=10, blank=True, default="")
+    status_code = models.PositiveIntegerField(null=True, blank=True)
+    ip = models.CharField(max_length=64, blank=True, default="")
+    user = models.CharField(max_length=150, blank=True, default="", help_text="Logged-in username, if any.")
+    user_agent = models.CharField(max_length=500, blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Error log"
+        verbose_name_plural = "Error logs"
+
+    def __str__(self):
+        return f"{self.level} · {self.message[:80]} · {self.created_at:%Y-%m-%d %H:%M}"

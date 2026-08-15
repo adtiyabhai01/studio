@@ -274,6 +274,66 @@
       });
     });
 
+    /* ---------- error logs: expand traceback + filter ---------- */
+    var logRows = document.querySelectorAll(".ap-log-row");
+
+    function toggleLog(row) {
+      var detail = row.nextElementSibling;
+      var open = row.classList.toggle("is-open");
+      row.setAttribute("aria-expanded", open ? "true" : "false");
+      if (detail && detail.classList.contains("ap-log-detail")) {
+        detail.hidden = !open;
+      }
+    }
+
+    logRows.forEach(function (row) {
+      var clickTarget = row;
+      row.addEventListener("click", function (e) {
+        if (e.target.closest("a, button, input, select")) return;
+        toggleLog(row);
+      });
+      row.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggleLog(row);
+        }
+      });
+    });
+
+    var logLevelFilter = document.getElementById("apLogLevel");
+    var logSearch = document.getElementById("apLogSearch");
+
+    function applyLogFilters() {
+      if (!logLevelFilter && !logSearch) return;
+      var level = logLevelFilter ? logLevelFilter.value : "";
+      var q = logSearch ? logSearch.value.trim().toLowerCase() : "";
+      document.querySelectorAll(".ap-log-row, .ap-log-detail").forEach(function (el) {
+        var hideLevel = level && el.dataset.level !== level;
+        var hideQuery = false;
+        if (q.length > 1) {
+          var hay = (el.dataset.query || "").toLowerCase();
+          hideQuery = hay.indexOf(q) === -1;
+        }
+        var filtered = hideLevel || hideQuery;
+        el.classList.toggle("is-filtered", filtered);
+        if (el.classList.contains("ap-log-row")) {
+          el.classList.toggle("is-open", el.classList.contains("is-open") && !filtered);
+        } else if (el.classList.contains("ap-log-detail")) {
+          var row = el.previousElementSibling;
+          var rowOpen = row && !row.classList.contains("is-filtered") && row.classList.contains("is-open");
+          el.hidden = filtered || !rowOpen;
+        }
+      });
+    }
+
+    if (logLevelFilter) {
+      logLevelFilter.addEventListener("change", applyLogFilters);
+      // Reset the dropdown when the tab is opened fresh (the ?tab= restore).
+    }
+    if (logSearch) {
+      logSearch.addEventListener("input", applyLogFilters);
+    }
+
     /* ---------- site health dashboard ---------- */
     var healthPanel = document.getElementById("panel-site");
     var HEALTH_LABELS = {

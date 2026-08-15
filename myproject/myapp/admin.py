@@ -4,6 +4,7 @@ from django.utils.html import format_html
 from .models import (
     City,
     Enquiry,
+    ErrorLog,
     HeroVideo,
     Offer,
     Package,
@@ -306,3 +307,28 @@ class HeroVideoAdmin(admin.ModelAdmin):
         (None, {"fields": ("title", "video", "poster")}),
         ("Options", {"fields": ("is_featured", "is_active", "sort_order")}),
     )
+
+
+@admin.register(ErrorLog)
+class ErrorLogAdmin(admin.ModelAdmin):
+    """Error logs are written automatically — admin can review and delete only."""
+
+    list_display = ("level", "message_preview", "path", "method", "status_code", "ip", "created_at")
+    list_filter = ("level", "status_code", "created_at")
+    search_fields = ("message", "path", "ip", "user", "traceback")
+    readonly_fields = (
+        "level", "message", "traceback", "path", "method",
+        "status_code", "ip", "user", "user_agent", "created_at",
+    )
+    date_hierarchy = "created_at"
+    ordering = ("-created_at",)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    @admin.display(description="Message")
+    def message_preview(self, obj):
+        return obj.message[:90]
