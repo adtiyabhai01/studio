@@ -215,6 +215,36 @@
       var hidden = form.querySelector('[name="' + input.name + '_direct"]');
       var folder = input.dataset.folder || "videos";
 
+      // Warn if the clip is below 1080p or portrait — fullscreen (e.g. hero)
+      // displays upscale/crop it, so it ends up looking soft even though the
+      // delivery resolves at the original resolution.
+      function warnVideoResolution(file, input) {
+        var note = statusEl(input);
+        if (!note) return;
+        var url = URL.createObjectURL(file);
+        var v = document.createElement("video");
+        v.preload = "metadata";
+        v.muted = true;
+        v.onloadedmetadata = function () {
+          URL.revokeObjectURL(url);
+          var w = v.videoWidth, h = v.videoHeight;
+          if (!w || !h) return;
+          var msg = "";
+          if (w < 1920 || h < 1080) {
+            msg = "Low resolution " + w + "x" + h + " — fullscreen pe blurry lagega. 1080p+ video upload karein.";
+          } else if (h > w) {
+            msg = "Portrait video (" + w + "x" + h + ") fullscreen hero pe crop ho jata hai.";
+          }
+          if (!msg) return;
+          var box = document.createElement("code");
+          box.style.cssText = "display:block;margin-top:6px;padding:8px 10px;background:rgba(178,138,84,0.12);border:1px solid rgba(178,138,84,0.4);border-radius:8px;font-size:0.78rem;color:#f2e0c0;white-space:pre-wrap;word-break:break-word;";
+          box.textContent = msg;
+          note.appendChild(box);
+        };
+        v.onerror = function () { URL.revokeObjectURL(url); };
+        v.src = url;
+      }
+
       function setError(msg, detail) {
         if (hidden) hidden.value = "";
         var note = statusEl(input);
@@ -301,6 +331,7 @@
             input.dataset.hasVideo = "1";
             clearInput(input);
             setStatus(input, "Video uploaded \u2713  (" + fmt(file.size) + ", full quality).", false);
+            warnVideoResolution(file, input);
             console.info("Cloudinary upload OK:", publicId);
           } else {
             console.error("Cloudinary upload failed:", xhr.responseText);
