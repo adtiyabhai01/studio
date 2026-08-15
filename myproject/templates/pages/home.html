@@ -74,7 +74,7 @@
     </header>
     <div class="stories-strip">
     {% for image in stories|slice:":6" %}
-      <figure class="story">
+      <figure class="story tilt">
         <div class="story-imgbox">
           <img src="{{ image.image.url }}" alt="{{ image.get_alt }}" loading="lazy">
         </div>

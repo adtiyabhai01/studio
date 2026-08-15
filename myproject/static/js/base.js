@@ -5,14 +5,30 @@
   var nav = document.getElementById("siteNav");
   var burger = document.getElementById("navBurger");
   var drawer = document.getElementById("navDrawer");
+  var progress = document.getElementById("scrollProgress");
+  var toTop = document.getElementById("toTop");
 
   function onScroll() {
     if (nav) {
       nav.classList.toggle("is-scrolled", window.scrollY > 40);
     }
+    if (progress) {
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      progress.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + "%";
+    }
+    if (toTop) {
+      toTop.classList.toggle("is-visible", window.scrollY > 640);
+    }
   }
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
+
+  if (toTop) {
+    toTop.addEventListener("click", function () {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
 
   function toggleMenu(open) {
     if (!burger || !drawer) return;
@@ -110,6 +126,31 @@
       el.classList.add("is-revealed");
     });
   }
+
+  // 3D tilt on cards — desktop + fine pointers only, subtle cinematic lean.
+  (function tiltCards() {
+    if (window.matchMedia("(hover: none)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var cards = Array.prototype.slice.call(document.querySelectorAll(".tilt"));
+    if (!cards.length) return;
+    var MAX = 7;
+
+    cards.forEach(function (card) {
+      card.addEventListener("mousemove", function (e) {
+        var r = card.getBoundingClientRect();
+        var px = (e.clientX - r.left) / r.width - 0.5;
+        var py = (e.clientY - r.top) / r.height - 0.5;
+        card.classList.add("is-active");
+        card.style.transform =
+          "perspective(900px) rotateX(" + (-py * MAX * 2).toFixed(2) + "deg) " +
+          "rotateY(" + (px * MAX * 2).toFixed(2) + "deg) translateY(-3px)";
+      });
+      card.addEventListener("mouseleave", function () {
+        card.classList.remove("is-active");
+        card.style.transform = "";
+      });
+    });
+  })();
 
   // Auto-dismiss Django flash messages.
   setTimeout(function () {

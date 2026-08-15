@@ -108,4 +108,28 @@
       restart();
     }, { passive: true });
   }
+
+  // ---- Hero parallax — media lags behind, content drifts ahead for depth.
+  (function heroParallax() {
+    var media = document.querySelector(".hero-media");
+    var content = document.querySelector(".hero-content");
+    if (!media) return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    var ticking = false;
+    function update() {
+      ticking = false;
+      var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+      if (y > window.innerHeight * 1.3) return;
+      media.style.transform = "translateY(" + (y * 0.32).toFixed(1) + "px)";
+      if (content) content.style.transform = "translateY(" + (y * -0.14).toFixed(1) + "px)";
+    }
+    window.addEventListener("scroll", function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    window.addEventListener("resize", function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    update();
+  })();
 })();

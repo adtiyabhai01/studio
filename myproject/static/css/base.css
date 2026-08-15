@@ -498,6 +498,67 @@ h1 em, h2 em, h3 em { font-style: italic; color: var(--gold-strong); }
 
 .empty { color: var(--muted); font-size: 1rem; padding: 60px 0; text-align: left; }
 
+/* ---------- cinematic marquee ---------- */
+
+.marquee {
+  overflow: hidden;
+  background: var(--ink-2);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 20px 0;
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 34s linear infinite;
+}
+.marquee-seg {
+  display: flex;
+  align-items: center;
+  gap: 42px;
+  padding-right: 42px;
+  white-space: nowrap;
+}
+.marquee-seg span {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ivory);
+}
+.marquee-seg i { font-style: normal; color: var(--gold-strong); font-size: 0.8rem; }
+@keyframes marqueeScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* ---------- 3D tilt cards ---------- */
+
+.tilt { transform-style: preserve-3d; will-change: transform; transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease); }
+.tilt.is-active { transition: transform 0.08s linear; }
+
+/* ---------- scroll progress + back to top ---------- */
+
+.scroll-progress {
+  position: fixed; top: 0; left: 0;
+  height: 3px; width: 0%;
+  z-index: 400;
+  background: linear-gradient(90deg, var(--gold-deep), var(--gold-strong));
+  box-shadow: 0 0 12px rgba(217, 189, 139, 0.55);
+}
+.to-top {
+  position: fixed; left: 22px; bottom: 22px;
+  z-index: 200;
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--gold);
+  color: #171210;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
+  opacity: 0; visibility: hidden; transform: translateY(12px);
+  transition: opacity var(--tr), transform var(--tr), visibility var(--tr);
+}
+.to-top svg { width: 20px; height: 20px; }
+.to-top.is-visible { opacity: 1; visibility: visible; transform: none; }
+.to-top:hover { background: var(--gold-strong); }
+
 /* ---------- media queries ---------- */
 
 @media (max-width: 900px) {
@@ -510,4 +571,11 @@ h1 em, h2 em, h3 em { font-style: italic; color: var(--gold-strong); }
 @media (max-width: 560px) {
   .foot-grid { grid-template-columns: 1fr; }
   .page-hero { padding-top: 130px; }
+}
+
+/* ---------- reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+  .tilt { transition: none; }
 }
