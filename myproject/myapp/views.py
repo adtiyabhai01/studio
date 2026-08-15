@@ -925,7 +925,12 @@ def portal_content_delete(request, key, pk):
     if section.singleton:
         raise Http404("This section cannot be deleted")
 
-    obj = get_object_or_404(section.model, pk=pk)
+    obj = section.model.objects.filter(pk=pk).first()
+    if obj is None:
+        # Object already deleted (e.g. double submit / stale link). Treat as done.
+        messages.success(request, f"\u201c{section.singular.capitalize()}\u201d was already deleted.")
+        return redirect("main:portal_content_list", key=key)
+
     if request.method == "POST":
         label = str(obj)
         obj.delete()
