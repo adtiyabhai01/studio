@@ -6,7 +6,7 @@
     <p class="ap-cm-del-sub">
       This will permanently remove this {{ section.singular|lower }}. This action cannot be undone.
     </p>
-    <form method="post">
+    <form method="post" data-guard-submit>
       {% csrf_token %}
       <div class="ap-cm-actions">
         <button class="btn btn--danger" type="submit">Delete {{ section.singular|lower }}</button>
@@ -14,4 +14,18 @@
       </div>
     </form>
   </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll("[data-guard-submit]").forEach(function (form) {
+    form.addEventListener("submit", function () {
+      var btn = form.querySelector("button[type=submit]");
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Deleting…";
+      }
+    });
+  });
+</script>
 {% endblock %}
