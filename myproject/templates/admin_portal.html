@@ -381,7 +381,7 @@
             already-open pages switch instantly. You stay logged in here to turn it back off.
           </p>
         </div>
-        <form method="post" action="{% url 'main:admin_portal' %}">
+        <form method="post" action="{% url 'main:admin_portal' %}" data-keep-tab>
           {% csrf_token %}
           <input type="hidden" name="portal_action" value="maintenance">
           <button type="submit" class="ap-maint-btn {% if maintenance_mode %}is-on{% endif %}">
@@ -468,7 +468,7 @@
               id="apThemeState">Custom theme {% if theme.is_custom %}ON{% else %}OFF{% endif %}</span>
       </div>
 
-      <form class="ap-theme-form" method="post" action="{% url 'main:admin_portal' %}" id="apThemeForm">
+      <form class="ap-theme-form" method="post" action="{% url 'main:admin_portal' %}" id="apThemeForm" data-keep-tab>
         {% csrf_token %}
         <input type="hidden" name="portal_action" value="theme">
 

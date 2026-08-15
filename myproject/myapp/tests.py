@@ -1,8 +1,11 @@
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import Client, TestCase
+from django.urls import reverse
 
 from .content import TeamMemberForm
-from .models import TeamMember
+from .models import Enquiry, TeamMember, ThemeSettings
+from .views import THEME_COLOR_KEYS
 
 
 class TeamMemberDeveloperTests(TestCase):
@@ -64,3 +67,45 @@ class AboutPageTeamTests(TestCase):
         self.assertContains(resp, "Zoe")
         self.assertEqual(resp.context["team_developer"].pk, dev.pk)
         self.assertEqual([m.pk for m in resp.context["team"]], [member.pk])
+
+
+class AdminPortalTabPreservationTests(TestCase):
+    """Actions in the admin portal must redirect back to the tab the user
+    was on (not reset to the default 'enquiries' tab)."""
+
+    def setUp(self):
+        self.user = User.objects.create_superuser("boss", "boss@example.com", "strongpass99")
+        self.client = Client(HTTP_HOST="localhost")
+        self.client.force_login(self.user)
+        self.url = reverse("main:admin_portal")
+
+    def test_maintenance_toggle_redirects_to_site_tab(self):
+        resp = self.client.post(self.url, {"portal_action": "maintenance", "tab": "site"})
+        self.assertRedirects(resp, self.url + "?tab=site")
+
+    def test_theme_save_redirects_to_theme_tab(self):
+        theme = ThemeSettings.load()
+        data = {"portal_action": "theme", "tab": "theme", "is_custom": "on"}
+        for key in THEME_COLOR_KEYS:
+            data[key] = getattr(theme, key).lower()
+        data["container_width"] = str(theme.container_width)
+        data["heading_font"] = theme.heading_font
+        data["body_font"] = theme.body_font
+        resp = self.client.post(self.url, data)
+        self.assertRedirects(resp, self.url + "?tab=theme")
+
+    def test_theme_reset_redirects_to_theme_tab(self):
+        resp = self.client.post(self.url, {"portal_action": "theme", "tab": "theme", "reset_theme": "1"})
+        self.assertRedirects(resp, self.url + "?tab=theme")
+
+    def test_status_update_redirects_to_enquiries_tab(self):
+        enquiry = Enquiry.objects.create(name="Neha", phone="9876500000", status="NEW")
+        resp = self.client.post(
+            self.url,
+            {"portal_action": "status", "enquiry_id": str(enquiry.pk), "status": "CONTACTED", "tab": "enquiries"},
+        )
+        self.assertRedirects(resp, self.url + "?tab=enquiries")
+
+    def test_missing_tab_falls_back_to_plain_redirect(self):
+        resp = self.client.post(self.url, {"portal_action": "maintenance"})
+        self.assertRedirects(resp, self.url)

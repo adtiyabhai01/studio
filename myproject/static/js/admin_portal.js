@@ -44,6 +44,11 @@
     var tabs = document.querySelectorAll(".ap-tab");
     var panels = document.querySelectorAll(".ap-panel");
 
+    function currentTab() {
+      var active = document.querySelector(".ap-tab.is-active");
+      return active ? active.dataset.tab : "";
+    }
+
     function activateTab(key) {
       tabs.forEach(function (tab) {
         tab.classList.toggle("is-active", tab.dataset.tab === key);
@@ -59,6 +64,21 @@
         stopHealthPolling();
       }
     }
+
+    // Keep the current tab after server-side form posts (maintenance toggle,
+    // theme save) — the active tab is posted along and restored on redirect.
+    document.querySelectorAll("form[data-keep-tab]").forEach(function (form) {
+      form.addEventListener("submit", function () {
+        var input = form.querySelector('input[name="tab"]');
+        if (!input) {
+          input = document.createElement("input");
+          input.type = "hidden";
+          input.name = "tab";
+          form.appendChild(input);
+        }
+        input.value = currentTab() || "";
+      });
+    });
 
     tabs.forEach(function (tab) {
       tab.addEventListener("click", function () {

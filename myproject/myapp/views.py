@@ -9,6 +9,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
@@ -682,6 +683,15 @@ def _portal_context(request):
     return context
 
 
+def _portal_redirect(request):
+    """Redirect back to admin portal preserving the active tab the user was on,
+    so actions (maintenance toggle, theme save) don't bounce to the default tab."""
+    tab = request.POST.get("tab", "")
+    if tab in {"enquiries", "manage", "site", "visitors", "theme"}:
+        return redirect(reverse("main:admin_portal") + "?tab=" + tab)
+    return redirect("main:admin_portal")
+
+
 def admin_portal(request):
     if request.method == "POST":
         action = request.POST.get("portal_action")
@@ -706,7 +716,7 @@ def admin_portal(request):
             if enquiry_id.isdigit() and new_status in valid_statuses:
                 Enquiry.objects.filter(pk=enquiry_id).update(status=new_status)
                 messages.success(request, "Enquiry status updated.")
-            return redirect("main:admin_portal")
+            return _portal_redirect(request)
 
         if action == "maintenance" and request.user.is_authenticated:
             site_settings = SiteSettings.load()
@@ -714,7 +724,7 @@ def admin_portal(request):
             site_settings.save()
             state = "ON" if site_settings.maintenance_mode else "OFF"
             messages.success(request, f"Maintenance mode is now {state} across the site.")
-            return redirect("main:admin_portal")
+            return _portal_redirect(request)
 
         if action == "theme" and request.user.is_authenticated:
             theme = ThemeSettings.load()
@@ -731,7 +741,7 @@ def admin_portal(request):
                 theme.is_custom = True
                 theme.save()
                 messages.success(request, "Theme reset to the default design.")
-                return redirect("main:admin_portal")
+                return _portal_redirect(request)
 
             valid_fonts = {value for value, _label in HEADING_FONTS + BODY_FONTS}
 
@@ -747,7 +757,7 @@ def admin_portal(request):
 
             if bad or not width_ok or heading not in valid_fonts or body not in valid_fonts:
                 messages.error(request, "Theme not saved — invalid colour, width or font value.")
-                return redirect("main:admin_portal")
+                return _portal_redirect(request)
 
             theme.is_custom = request.POST.get("is_custom") == "on"
             for key in THEME_COLOR_KEYS:
@@ -757,7 +767,7 @@ def admin_portal(request):
             theme.body_font = body
             theme.save()
             messages.success(request, "Theme settings saved — refresh the site to see the new look.")
-            return redirect("main:admin_portal")
+            return _portal_redirect(request)
 
     can_manage = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
     if can_manage:
