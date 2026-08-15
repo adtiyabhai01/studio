@@ -738,6 +738,16 @@ def admin_portal(request):
             messages.success(request, "Error logs cleared.")
             return _portal_redirect(request)
 
+        if action == "remove_visit" and request.user.is_authenticated:
+            visit_id = request.POST.get("visit_id", "")
+            if visit_id.isdigit():
+                deleted = SiteVisit.objects.filter(pk=visit_id).delete()[0]
+                if deleted:
+                    messages.success(request, "Visitor record removed.")
+                else:
+                    messages.info(request, "That visitor record was already removed.")
+            return _portal_redirect(request)
+
         if action == "theme" and request.user.is_authenticated:
             theme = ThemeSettings.load()
 

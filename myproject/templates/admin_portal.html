@@ -418,6 +418,7 @@
                 <th>Screen</th>
                 <th>Visit Time</th>
                 <th>Pages</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -446,6 +447,15 @@
                   </td>
                   <td>
                     <span class="ap-cell-sub" title="{{ visit.pages_preview }}">{{ visit.page_count }} page{{ visit.page_count|pluralize }}</span>
+                  </td>
+                  <td class="ap-visit-actions">
+                    <form method="post" action="{% url 'main:admin_portal' %}" data-keep-tab
+                          onsubmit="return confirm('Remove this visitor record?');">
+                      {% csrf_token %}
+                      <input type="hidden" name="portal_action" value="remove_visit">
+                      <input type="hidden" name="visit_id" value="{{ visit.pk }}">
+                      <button class="ap-visit-remove" type="submit" title="Remove visitor" aria-label="Remove visitor">✕</button>
+                    </form>
                   </td>
                 </tr>
               {% endfor %}
