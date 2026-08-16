@@ -233,7 +233,7 @@
           if (w < 1920 || h < 1080) {
             msg = "Low resolution " + w + "x" + h + " — fullscreen pe blurry lagega. 1080p+ video upload karein.";
           } else if (h > w) {
-            msg = "Portrait video (" + w + "x" + h + ") fullscreen hero pe crop ho jata hai.";
+            msg = "Portrait video (" + w + "x" + h + ") — isko bina crop ke dikhane ke liye neeche 'Orientation: Portrait' select karein.";
           }
           if (!msg) return;
           var box = document.createElement("code");

@@ -722,10 +722,23 @@ class Enquiry(models.Model):
 # ---------------------------------------------------------------------------
 
 
+VIDEO_ORIENTATIONS = [
+    ("landscape", "Landscape"),
+    ("portrait", "Portrait"),
+]
+
+
 class HeroVideo(models.Model):
     title = models.CharField(max_length=120, blank=True)
     video = models.FileField(upload_to="hero/", blank=True, null=True, help_text="MP4 recommended.", storage=SmartVideoCloudinaryStorage())
     poster = models.ImageField(upload_to="hero/", blank=True, null=True, help_text="Shown until video loads.")
+    orientation = models.CharField(
+        max_length=20,
+        choices=VIDEO_ORIENTATIONS,
+        default="landscape",
+        db_index=False,
+        help_text="Portrait = zumwa (9:16, phone video). Landscape = wide (16:9). Hero usko bina crop ke sahi style me dikhayega.",
+    )
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)

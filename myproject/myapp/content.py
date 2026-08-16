@@ -315,7 +315,7 @@ class CityForm(PortalModelForm):
 class HeroVideoForm(PortalModelForm):
     class Meta:
         model = HeroVideo
-        fields = ["title", "video", "poster", "is_featured", "is_active", "sort_order"]
+        fields = ["title", "orientation", "video", "poster", "is_featured", "is_active", "sort_order"]
         video_fields = ("video",)
 
 
@@ -550,6 +550,7 @@ CONTENT_SECTIONS = {
         desc="Homepage background films",
         list_display=[
             {"label": "Title", "value": "title"},
+            {"label": "Orientation", "value": lambda o: o.get_orientation_display(), "html": False},
             {"label": "File", "value": lambda o: _file_badge(o, "video"), "html": True},
             {"label": "Poster", "value": lambda o: _badge(bool(o.poster)), "html": True},
             {"label": "Featured", "value": lambda o: _badge(o.is_featured), "html": True},

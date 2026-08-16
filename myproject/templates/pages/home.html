@@ -11,7 +11,7 @@
 {% block content %}
 
 <section class="hero" id="home-hero">
-  <div class="hero-media">
+  <div class="hero-media{% if hero_videos.0.orientation == 'portrait' %} hero-media--portrait{% endif %}">
     {% if hero_videos %}
       {% if hero_videos.0.video %}
         <video class="hero-video" autoplay muted loop playsinline preload="none"

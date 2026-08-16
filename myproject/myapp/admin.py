@@ -301,10 +301,10 @@ class CityAdmin(admin.ModelAdmin):
 
 @admin.register(HeroVideo)
 class HeroVideoAdmin(admin.ModelAdmin):
-    list_display = ("title", "is_featured", "is_active", "sort_order")
-    list_editable = ("is_featured", "is_active", "sort_order")
+    list_display = ("title", "orientation", "is_featured", "is_active", "sort_order")
+    list_editable = ("orientation", "is_featured", "is_active", "sort_order")
     fieldsets = (
-        (None, {"fields": ("title", "video", "poster")}),
+        (None, {"fields": ("title", "video", "poster", "orientation")}),
         ("Options", {"fields": ("is_featured", "is_active", "sort_order")}),
     )
 
