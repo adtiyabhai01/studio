@@ -13,8 +13,8 @@
 
 <section class="svc-hero">
   {% if hero_video %}
-    <video class="svc-hero-video" autoplay muted loop playsinline preload="none" poster="{% if service.video_poster %}{{ service.video_poster.url }}{% endif %}">
-      <source src="{{ hero_video.url }}" type="video/mp4">
+    <video class="svc-hero-video" autoplay muted loop playsinline preload="auto" poster="{% if service.video_poster %}{{ service.video_poster.url }}{% endif %}">
+      <source src="{{ hero_video.url }}">
     </video>
   {% elif hero_image %}
     <img class="svc-hero-img" src="{{ hero_image.url }}" alt="{{ page_heading }}" fetchpriority="high">

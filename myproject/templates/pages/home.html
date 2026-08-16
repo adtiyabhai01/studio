@@ -14,14 +14,16 @@
   <div class="hero-media{% if hero_videos.0.orientation == 'portrait' %} hero-media--portrait{% endif %}">
     {% if hero_videos %}
       {% if hero_videos.0.video %}
-        <video class="hero-video" autoplay muted loop playsinline preload="none"
+        <video class="hero-video" autoplay muted loop playsinline preload="auto"
                poster="{% if hero_videos.0.poster %}{{ hero_videos.0.poster.url }}{% endif %}">
-          <source src="{{ hero_videos.0.video.url }}" type="video/{% if hero_videos.0.video.url|slice:'-4:' == '.mov' %}mp4{% else %}mp4{% endif %}">
+          <source src="{{ hero_videos.0.video.url }}">
         </video>
       {% endif %}
     {% endif %}
     {% if hero_fallback %}
       <img class="hero-img" src="{{ hero_fallback.url }}" alt="{{ hero_title }}" fetchpriority="high">
+    {% elif hero_videos.0.poster %}
+      <img class="hero-img" src="{{ hero_videos.0.poster.url }}" alt="" aria-hidden="true">
     {% elif not hero_videos %}
       <div class="hero-img hero-img--gradient" role="presentation"></div>
     {% endif %}

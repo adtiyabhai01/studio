@@ -2,18 +2,33 @@
 (function () {
   "use strict";
 
-  // ---- Hero video: if it fails to load, reveal the fallback art behind it.
+  // ---- Hero video: fade it in over the poster/fallback once it can play.
+  // Safety net: if "canplay" never fires (slow net, data-saver, autoplay
+  // blockers, or the event racing past this listener on a cached video),
+  // reveal it after a short timeout so the hero is never left blank.
   (function heroFallback() {
     var video = document.querySelector(".hero-video");
     if (!video) return;
+    var media = video.closest(".hero-media");
+    var hasBase = media && media.querySelector(".hero-img");
     video.addEventListener("error", function () {
       video.style.display = "none";
     });
-    video.addEventListener("canplay", function () {
+    if (!hasBase) {
       video.style.opacity = "1";
-    });
+      return;
+    }
+    var revealed = false;
+    function reveal() {
+      if (revealed) return;
+      revealed = true;
+      video.style.opacity = "1";
+    }
     video.style.opacity = "0";
     video.style.transition = "opacity .8s ease";
+    video.addEventListener("canplay", reveal);
+    video.addEventListener("playing", reveal);
+    setTimeout(reveal, 4000);
   })();
 
   // ---- Animated counters.
