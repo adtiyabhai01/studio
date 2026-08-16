@@ -17,3 +17,10 @@
   .offers-grid--stack .offer-card { flex-direction: column; }
   .offers-grid--stack .offer-card-media { width: 100%; aspect-ratio: 16 / 9; }
 }
+
+@media (max-width: 480px) {
+  .offer-card-body { padding: 20px; }
+  .offer-card-now { font-size: 2rem; }
+  .offer-card-actions { gap: 14px; align-items: stretch; }
+  .offer-card-actions .btn, .offer-card-wa { flex: 1 1 100%; text-align: center; }
+}
