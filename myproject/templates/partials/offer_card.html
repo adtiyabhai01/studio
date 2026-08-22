@@ -1,7 +1,8 @@
+{% load imgopt %}
 <article class="offer-card {% if offer.is_featured %}offer-card--featured{% endif %} tilt reveal">
   {% if offer.image %}
     <div class="offer-card-media">
-      <img src="{{ offer.image.url }}" alt="{{ offer.title }}" loading="lazy">
+      <img src="{{ offer.image.url|imgopt:'f_auto,q_auto:good,w_600,c_limit' }}" alt="{{ offer.title }}" loading="lazy">
     </div>
   {% endif %}
   <div class="offer-card-body">

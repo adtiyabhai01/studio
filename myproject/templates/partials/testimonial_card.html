@@ -1,3 +1,4 @@
+{% load imgopt %}
 <figure class="t-card reveal">
   <div class="t-card-stars" aria-label="{{ testimonial.rating }} star rating">
     {% for _ in "12345" %}
@@ -11,7 +12,7 @@
   <blockquote class="t-card-quote">“{{ testimonial.review }}”</blockquote>
   <figcaption class="t-card-meta">
     {% if testimonial.client_photo %}
-      <img class="t-card-avatar" src="{{ testimonial.client_photo.url }}" alt="{{ testimonial.client_name }}" loading="lazy">
+      <img class="t-card-avatar" src="{{ testimonial.client_photo.url|imgopt:'f_auto,q_auto:good,w_100,c_limit' }}" alt="{{ testimonial.client_name }}" loading="lazy">
     {% else %}
       <span class="t-card-avatar t-card-avatar--mono">{{ testimonial.client_name|slice:":1" }}</span>
     {% endif %}

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static imgopt %}
 
 {% block title %}Portfolio — {{ site.brand_name }}{% endblock %}
 {% block meta_description %}Explore our portfolio of weddings, pre-weddings, engagements, couples, babies and maternity sessions. Every frame a story, every film a memory.{% endblock %}
@@ -39,7 +39,7 @@
                 data-caption="{{ video.title|default:'Film' }}">
           <button type="button" class="g-item-btn" aria-label="Watch {{ video.title|default:'film' }}">
             {% if video.poster %}
-              <img class="g-item-img g-item-img--video" src="{{ video.poster.url }}" alt="{{ video.title|default:'Film' }}" loading="lazy">
+              <img class="g-item-img g-item-img--video" src="{{ video.poster.url|imgopt:'f_auto,q_auto:good,w_600,c_limit' }}" alt="{{ video.title|default:'Film' }}" loading="lazy">
             {% else %}
               <div class="g-item-img g-item-img--video g-item-img--mono">{{ video.title|slice:":1" }}</div>
             {% endif %}

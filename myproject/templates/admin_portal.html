@@ -1,4 +1,5 @@
 {% load static %}
+{% load imgopt %}
 {% load portal_extras %}
 <!DOCTYPE html>
 <html lang="en">
@@ -30,7 +31,7 @@
         </svg>
         <span class="pre-mark">
           {% if site.logo %}
-            <img class="pre-logo" src="{{ site.logo.url }}" alt="{{ site.brand_name }}">
+            <img class="pre-logo" src="{{ site.logo.url|imgopt:'f_auto,q_auto:good,w_200,c_limit' }}" alt="{{ site.brand_name }}">
           {% else %}
             {{ site.brand_name|slice:":1" }}
           {% endif %}
@@ -53,7 +54,7 @@
         </svg>
         <span class="ap-mark">
           {% if site.logo %}
-            <img class="ap-logo" src="{{ site.logo.url }}" alt="{{ site.brand_name }}">
+            <img class="ap-logo" src="{{ site.logo.url|imgopt:'f_auto,q_auto:good,w_200,c_limit' }}" alt="{{ site.brand_name }}">
           {% else %}
             {{ site.brand_name|slice:":1" }}
           {% endif %}

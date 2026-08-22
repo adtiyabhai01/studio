@@ -1,11 +1,11 @@
-{% load static %}
+{% load static imgopt %}
 <footer class="site-foot">
   <div class="container">
     <div class="foot-grid">
       <div class="foot-brand">
         <a class="foot-logo" href="/">
           {% if site.logo %}
-            <img class="nav-brand-logo" src="{{ site.logo.url }}" alt="{{ site.brand_name }} logo">
+            <img class="nav-brand-logo" src="{{ site.logo.url|imgopt:'f_auto,q_auto:good,w_200,c_limit' }}" alt="{{ site.brand_name }} logo">
           {% else %}
             <span class="nav-brand-mark">C</span>
             <span class="foot-logo-name">{{ site.brand_name }}</span>

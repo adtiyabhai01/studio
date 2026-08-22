@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static imgopt %}
 
 {% block title %}About Us — {{ site.brand_name }} Photography & Videography{% endblock %}
 {% block meta_description %}The story and philosophy behind {{ site.brand_name }} — why couples and families across cities trust us with their most precious moments.{% endblock %}
@@ -31,7 +31,7 @@
       <div class="about-visual reveal">
         <div class="about-frame">
           {% if site.hero_fallback %}
-            <img src="{{ site.hero_fallback.url }}" alt="{{ site.brand_name }} studio" loading="lazy">
+            <img src="{{ site.hero_fallback.url|imgopt:'f_auto,q_auto:good,w_800,c_limit' }}" alt="{{ site.brand_name }} studio" loading="lazy">
           {% else %}
             <span class="about-frame-mono">{{ site.brand_name|slice:":1" }}</span>
           {% endif %}
@@ -81,7 +81,7 @@
         <article class="team-card reveal">
           <div class="team-photo">
             {% if member.photo %}
-              <img class="team-img" src="{{ member.photo.url }}" alt="{{ member.name }}" loading="lazy">
+              <img class="team-img" src="{{ member.photo.url|imgopt:'f_auto,q_auto:good,w_400,c_limit' }}" alt="{{ member.name }}" loading="lazy">
             {% else %}
               <span class="team-img team-img--mono">{{ member.name|slice:":1" }}</span>
             {% endif %}
@@ -107,7 +107,7 @@
     <article class="team-dev reveal">
       <div class="team-dev-photo">
         {% if team_developer.photo %}
-          <img class="team-dev-img" src="{{ team_developer.photo.url }}" alt="{{ team_developer.name }}" loading="lazy">
+          <img class="team-dev-img" src="{{ team_developer.photo.url|imgopt:'f_auto,q_auto:good,w_400,c_limit' }}" alt="{{ team_developer.name }}" loading="lazy">
         {% else %}
           <span class="team-dev-img team-dev-img--mono">{{ team_developer.name|slice:":1" }}</span>
         {% endif %}

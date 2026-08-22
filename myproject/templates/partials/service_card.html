@@ -1,8 +1,8 @@
-{% load static %}
+{% load static imgopt %}
 <a class="service-card tilt reveal" href="{{ service.get_absolute_url }}" aria-label="{{ service.name }}">
   {% if service.image %}
     <div class="service-card-media">
-      <img src="{{ service.image.url }}" alt="{{ service.name }}" loading="lazy">
+      <img src="{{ service.image.url|imgopt:'f_auto,q_auto:good,w_500,c_limit' }}" alt="{{ service.name }}" loading="lazy">
     </div>
   {% else %}
     <div class="service-card-media service-card-media--fallback">

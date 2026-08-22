@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static imgopt %}
 
 {% block title %}{{ site.brand_name }} — Wedding, Pre-Wedding, Maternity & Baby Photography{% endblock %}
 {% block meta_description %}A premium photography & videography studio crafting cinematic wedding, pre-wedding, engagement, maternity and baby stories in every city. Check availability today.{% endblock %}
@@ -15,15 +15,15 @@
     {% if hero_videos %}
       {% if hero_videos.0.video %}
         <video class="hero-video" autoplay muted loop playsinline preload="auto"
-               poster="{% if hero_videos.0.poster %}{{ hero_videos.0.poster.url }}{% endif %}">
+               poster="{% if hero_videos.0.poster %}{{ hero_videos.0.poster.url|imgopt:'f_auto,q_auto:good' }}{% endif %}">
           <source src="{{ hero_videos.0.video.url }}">
         </video>
       {% endif %}
     {% endif %}
     {% if hero_fallback %}
-      <img class="hero-img" src="{{ hero_fallback.url }}" alt="{{ hero_title }}" fetchpriority="high">
+      <img class="hero-img" src="{{ hero_fallback.url|imgopt:'f_auto,q_auto:good' }}" alt="{{ hero_title }}" fetchpriority="high">
     {% elif hero_videos.0.poster %}
-      <img class="hero-img" src="{{ hero_videos.0.poster.url }}" alt="" aria-hidden="true">
+      <img class="hero-img" src="{{ hero_videos.0.poster.url|imgopt:'f_auto,q_auto:good' }}" alt="" aria-hidden="true">
     {% elif not hero_videos %}
       <div class="hero-img hero-img--gradient" role="presentation"></div>
     {% endif %}
@@ -78,7 +78,7 @@
     {% for image in stories|slice:":6" %}
       <figure class="story tilt">
         <div class="story-imgbox">
-          <img src="{{ image.image.url }}" alt="{{ image.get_alt }}" loading="lazy">
+          <img src="{{ image.image.url|imgopt:'f_auto,q_auto:good,w_400,c_limit' }}" alt="{{ image.get_alt }}" loading="lazy">
         </div>
         <figcaption class="story-cap">{{ image.category.name|default:"" }}{% if image.title %} · {{ image.title }}{% endif %}</figcaption>
       </figure>

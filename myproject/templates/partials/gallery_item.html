@@ -1,9 +1,10 @@
+{% load imgopt %}
 <figure class="g-item reveal" data-cat="{{ image.category.slug|default:'all' }}">
   <button type="button" class="g-item-btn"
-          data-lightbox="{{ image.image.url }}"
+          data-lightbox="{{ image.image.url|imgopt:'f_auto' }}"
           data-caption="{{ image.title|default:image.get_alt }}"
           aria-label="Open photo">
-    <img class="g-item-img" src="{{ image.image.url }}" alt="{{ image.get_alt }}" loading="lazy">
+    <img class="g-item-img" src="{{ image.image.url|imgopt:'f_auto,q_auto:good,w_600,c_limit' }}" alt="{{ image.get_alt }}" loading="lazy">
   </button>
   <figcaption class="g-item-cap">{{ image.category.name|default:"" }}</figcaption>
 </figure>

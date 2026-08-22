@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static imgopt %}
 
 {% block title %}Pre-Wedding Shoot — {{ site.brand_name }}{% endblock %}
 {% block meta_description %}Cinematic pre-wedding shoots across India — styled, golden-hour and candid frames plus a romantic film. Check availability and pre-wedding packages.{% endblock %}
@@ -12,11 +12,11 @@
 
 <section class="svc-hero">
   {% if hero_video %}
-    <video class="svc-hero-video" autoplay muted loop playsinline preload="auto" poster="{% if service.video_poster %}{{ service.video_poster.url }}{% endif %}">
+    <video class="svc-hero-video" autoplay muted loop playsinline preload="auto" poster="{% if service.video_poster %}{{ service.video_poster.url|imgopt:'f_auto,q_auto:good' }}{% endif %}">
       <source src="{{ hero_video.url }}">
     </video>
   {% elif hero_image %}
-    <img class="svc-hero-img" src="{{ hero_image.url }}" alt="{{ page_heading }}" fetchpriority="high">
+    <img class="svc-hero-img" src="{{ hero_image.url|imgopt:'f_auto,q_auto:good' }}" alt="{{ page_heading }}" fetchpriority="high">
   {% endif %}
   <div class="svc-hero-shade"></div>
   <div class="container svc-hero-content">
@@ -72,7 +72,7 @@
         <article class="v-card reveal" data-cat="{{ video.category.slug|default:'all' }}" data-video="{{ video.embed_id|default:'' }}" data-src="{{ video.video.url|default:'' }}">
           <div class="v-media">
             {% if video.poster %}
-              <img class="v-img" src="{{ video.poster.url }}" alt="{{ video.title }}" loading="lazy">
+              <img class="v-img" src="{{ video.poster.url|imgopt:'f_auto,q_auto:good,w_600,c_limit' }}" alt="{{ video.title }}" loading="lazy">
             {% else %}
               <div class="v-img v-img--mono">{{ video.title|slice:":1" }}</div>
             {% endif %}

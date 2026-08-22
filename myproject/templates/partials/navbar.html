@@ -1,9 +1,9 @@
-{% load static %}
+{% load static imgopt %}
 <header class="site-nav" id="siteNav">
   <div class="nav-inner">
     <a class="nav-brand" href="/" aria-label="{{ site.brand_name }} — home">
       {% if site.logo %}
-        <img class="nav-brand-logo" src="{{ site.logo.url }}" alt="{{ site.brand_name }} logo">
+        <img class="nav-brand-logo" src="{{ site.logo.url|imgopt:'f_auto,q_auto:good,w_200,c_limit' }}" alt="{{ site.brand_name }} logo">
       {% else %}
         <span class="nav-brand-mark">C</span>
         <span class="nav-brand-text">{{ site.brand_name }}</span>
