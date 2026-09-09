@@ -443,8 +443,8 @@
                   </td>
                   <td>{{ visit.screen|default:"—" }}</td>
                   <td>
-                    {{ visit.last_seen|date:"d M Y · H:i" }}
-                    <span class="ap-cell-sub">first {{ visit.created_at|date:"d M H:i" }}</span>
+                    {{ visit.last_seen|date:"d M Y · %I:%M %p" }}
+                    <span class="ap-cell-sub">first {{ visit.created_at|date:"d M %I:%M %p" }}</span>
                   </td>
                   <td>
                     <span class="ap-cell-sub" title="{{ visit.pages_preview }}">{{ visit.page_count }} page{{ visit.page_count|pluralize }}</span>
