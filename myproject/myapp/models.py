@@ -140,7 +140,7 @@ class SiteVisit(models.Model):
         verbose_name_plural = "Site visitors"
 
     def __str__(self):
-        return f"{self.ip or 'anon'} · {self.device_type or 'Unknown'} · {self.last_seen:%Y-%m-%d %I:%M %p}"
+        return f"{self.ip or 'anon'} · {self.device_type or 'Unknown'} · {self.last_seen:%Y-%m-%d g:i A}"
 
     def page_count(self):
         return len(self.pages or [])
