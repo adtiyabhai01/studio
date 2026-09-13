@@ -58,6 +58,14 @@
         panel.classList.toggle("is-active", on);
         panel.hidden = !on;
       });
+      // Remember the tab in the URL so refresh / back-button stays here.
+      try {
+        var url = new URL(window.location.href);
+        if (url.searchParams.get("tab") !== key) {
+          url.searchParams.set("tab", key);
+          window.history.replaceState(null, "", url.toString());
+        }
+      } catch (e) {}
       if (key === "site") {
         startHealthPolling();
       } else {

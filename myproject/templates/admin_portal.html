@@ -453,8 +453,7 @@
                     <span class="ap-cell-sub" title="{{ visit.pages_preview }}">{{ visit.page_count }} page{{ visit.page_count|pluralize }}</span>
                   </td>
                   <td class="ap-visit-actions">
-                    <form method="post" action="{% url 'main:admin_portal' %}" data-keep-tab
-                          onsubmit="return confirm('Remove this visitor record?');">
+                    <form method="post" action="{% url 'main:admin_portal' %}" data-keep-tab>
                       {% csrf_token %}
                       <input type="hidden" name="portal_action" value="remove_visit">
                       <input type="hidden" name="visit_id" value="{{ visit.pk }}">
