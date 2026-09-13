@@ -30,6 +30,21 @@ urlpatterns = [
     path("admin-portal/_debug/upload/", views.portal_upload_debug, name="portal_upload_debug"),
 
     # Frontend content manager
+    path(
+        "admin-portal/content/portfolio-photos/bulk/",
+        views.portal_bulk_upload,
+        name="portal_bulk_upload",
+    ),
+    path(
+        "admin-portal/content/<slug:key>/reorder/",
+        views.portal_content_reorder,
+        name="portal_content_reorder",
+    ),
+    path(
+        "admin-portal/enquiries/export/",
+        views.portal_enquiries_export,
+        name="portal_enquiries_export",
+    ),
     path("admin-portal/content/<slug:key>/", views.portal_content_list, name="portal_content_list"),
     path("admin-portal/content/<slug:key>/add/", views.portal_content_add, name="portal_content_add"),
     path("admin-portal/content/<slug:key>/<int:pk>/", views.portal_content_edit, name="portal_content_edit"),

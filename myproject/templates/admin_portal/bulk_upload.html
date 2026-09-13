@@ -1,0 +1,52 @@
+{% extends "admin_portal/base.html" %}
+{% block title %}Bulk Upload Photos · Admin Portal{% endblock %}
+{% block heading %}Bulk Upload Photos{% endblock %}
+{% block subtitle %}Ek saath bahut saari shaadi photos upload karo — 1-1 karke nahi. Category chuno, photos drop karo, Upload dabao.{% endblock %}
+{% block head_actions %}
+  <a class="btn btn--ghost btn--sm" href="{% url 'main:portal_content_list' 'portfolio-photos' %}">← Back to Photos</a>
+{% endblock %}
+{% block content %}
+  <form class="ap-cm-form" id="bulkForm" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="ap-theme-row" style="display:flex;gap:14px;flex-wrap:wrap;">
+      <label class="ap-theme-select" style="flex:1;min-width:220px;">
+        <span>Category</span>
+        <select class="field field-select" name="category">
+          <option value="">Uncategorised</option>
+          {% for cat in categories %}
+            <option value="{{ cat.pk }}">{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="ap-mfield--check" style="display:flex;align-items:center;gap:8px;">
+        <input class="field-check" type="checkbox" name="is_featured"> Featured
+      </label>
+      <label class="ap-mfield--check" style="display:flex;align-items:center;gap:8px;">
+        <input class="field-check" type="checkbox" name="is_active" checked> Active
+      </label>
+    </div>
+
+    <div class="ap-drop" id="apDrop">
+      <input type="file" id="apFiles" name="images" accept="image/jpeg,image/png,image/webp" multiple hidden>
+      <p class="ap-drop-title">Photos yahan drop karo ya <button type="button" class="ap-drop-browse" id="apBrowse">browse karo</button></p>
+      <p class="ap-help">JPG / PNG / WebP — har photo browser me hi ~2.5 MB tak optimize hogi, phir ek-ek karke upload hogi (Vercel limit safe). Bina JS ke bhi form submit kaam karega.</p>
+    </div>
+
+    <div class="ap-bulk-grid" id="apPreview" hidden></div>
+
+    <div class="ap-bulk-bar" id="apBarWrap" hidden>
+      <div class="ap-metric-bar"><span class="ap-metric-bar-fill" id="apBar" style="width:0%"></span></div>
+      <p class="ap-help" id="apStatus">Ready.</p>
+    </div>
+
+    <div class="ap-cm-actions">
+      <button class="btn btn--gold" type="submit" id="apUploadBtn">Upload Photos</button>
+      <a class="btn btn--ghost" href="{% url 'main:portal_content_list' 'portfolio-photos' %}">Cancel</a>
+    </div>
+  </form>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/bulk_upload.js?v=1"></script>
+{% endblock %}

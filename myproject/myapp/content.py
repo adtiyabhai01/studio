@@ -407,6 +407,17 @@ class ContentSection:
         self.per_page = per_page
         self.singleton = singleton
 
+    @property
+    def sortable(self):
+        """True when rows can be drag-drop reordered (model has sort_order)."""
+        if self.singleton:
+            return False
+        try:
+            field_names = {f.name for f in self.model._meta.get_fields() if hasattr(f, "name")}
+        except Exception:
+            return False
+        return "sort_order" in field_names
+
 
 CONTENT_SECTIONS = {
     "services": ContentSection(

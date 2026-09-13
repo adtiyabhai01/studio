@@ -345,5 +345,113 @@
         xhr.send(fd);
       });
     }
+    /* ---------- drag-drop reorder (content list) ---------- */
+    var reorderTable = document.getElementById("apCmTable");
+    var reorderBody = document.getElementById("apCmBody");
+    var toggleBtn = document.getElementById("apReorderToggle");
+    var saveBtn = document.getElementById("apReorderSave");
+    var hint = document.getElementById("apReorderHint");
+
+    function csrfToken() {
+      var m = document.querySelector('input[name="csrfmiddlewaretoken"]');
+      if (m) return m.value;
+      var match = document.cookie.match(/csrftoken=([^;]+)/);
+      return match ? decodeURIComponent(match[1]) : "";
+    }
+
+    if (reorderTable && reorderBody && toggleBtn && saveBtn) {
+      var reorderOn = false;
+      var dragRow = null;
+
+      function setReorder(on) {
+        reorderOn = on;
+        toggleBtn.textContent = on ? "✕ Done" : "↕ Reorder";
+        saveBtn.hidden = !on;
+        if (hint) hint.hidden = !on;
+        Array.prototype.forEach.call(reorderTable.querySelectorAll(".ap-drag-th, .ap-drag-handle"), function (el) {
+          el.hidden = !on;
+        });
+        Array.prototype.forEach.call(reorderBody.querySelectorAll("tr"), function (tr) {
+          tr.draggable = on;
+          tr.classList.toggle("is-reorder", on);
+        });
+      }
+
+      toggleBtn.addEventListener("click", function () { setReorder(!reorderOn); });
+
+      reorderBody.addEventListener("dragstart", function (e) {
+        var tr = e.target.closest("tr");
+        if (!tr || !reorderOn) return;
+        dragRow = tr;
+        tr.classList.add("is-dragging");
+        e.dataTransfer.effectAllowed = "move";
+        try { e.dataTransfer.setData("text/plain", tr.dataset.pk || ""); } catch (err) {}
+      });
+      reorderBody.addEventListener("dragend", function () {
+        if (dragRow) dragRow.classList.remove("is-dragging");
+        dragRow = null;
+        Array.prototype.forEach.call(reorderBody.querySelectorAll("tr"), function (tr) {
+          tr.classList.remove("is-over");
+        });
+      });
+      reorderBody.addEventListener("dragover", function (e) {
+        if (!reorderOn || !dragRow) return;
+        e.preventDefault();
+        var tr = e.target.closest("tr");
+        if (!tr || tr === dragRow) return;
+        var rect = tr.getBoundingClientRect();
+        var after = (e.clientY - rect.top) > rect.height / 2;
+        if (after) tr.parentNode.insertBefore(dragRow, tr.nextSibling);
+        else tr.parentNode.insertBefore(dragRow, tr);
+      });
+
+      // Touch fallback: tap handle to move row up/down.
+      reorderBody.addEventListener("click", function (e) {
+        if (!reorderOn) return;
+        var handle = e.target.closest(".ap-drag-handle");
+        if (!handle) return;
+        var tr = handle.closest("tr");
+        if (!tr) return;
+        var prev = tr.previousElementSibling;
+        if (prev) tr.parentNode.insertBefore(tr, prev);
+      });
+
+      saveBtn.addEventListener("click", function () {
+        var url = reorderTable.dataset.reorderUrl;
+        if (!url) return;
+        var order = Array.prototype.map.call(reorderBody.querySelectorAll("tr"), function (tr) {
+          return tr.dataset.pk;
+        }).filter(Boolean);
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Saving…";
+        fetch(url, {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken(),
+            "X-Requested-With": "XMLHttpRequest"
+          },
+          body: JSON.stringify({ order: order })
+        }).then(function (r) { return r.json(); }).then(function (j) {
+          if (j && j.ok) {
+            saveBtn.textContent = "Saved ✓";
+            setTimeout(function () {
+              saveBtn.disabled = false;
+              saveBtn.textContent = "Save Order";
+              setReorder(false);
+            }, 900);
+          } else {
+            saveBtn.disabled = false;
+            saveBtn.textContent = "Save Order";
+            alert("Order save nahi hua: " + ((j && j.error) || "unknown error"));
+          }
+        }).catch(function () {
+          saveBtn.disabled = false;
+          saveBtn.textContent = "Save Order";
+          alert("Network error — order save nahi hua.");
+        });
+      });
+    }
   });
 })();

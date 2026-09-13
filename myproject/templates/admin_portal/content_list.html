@@ -1,6 +1,9 @@
 {% extends "admin_portal/base.html" %}
 {% block title %}{{ section.name }} · Admin Portal{% endblock %}
 {% block head_actions %}
+  {% if show_bulk %}
+    <a class="btn btn--ghost btn--sm" href="{% url 'main:portal_bulk_upload' %}">⇪ Bulk Upload</a>
+  {% endif %}
   <a class="btn btn--gold btn--sm" href="{% url 'main:portal_content_add' section.key %}">+ Add New</a>
 {% endblock %}
 {% block content %}
@@ -13,20 +16,30 @@
         {% if query %}<a class="ap-cm-clear" href="{% url 'main:portal_content_list' section.key %}">Clear</a>{% endif %}
       </form>
     {% endif %}
+    {% if show_reorder %}
+      <div class="ap-reorder-tools">
+        <button class="btn btn--ghost btn--sm" type="button" id="apReorderToggle">↕ Reorder</button>
+        <button class="btn btn--gold btn--sm" type="button" id="apReorderSave" hidden>Save Order</button>
+        <span class="ap-help" id="apReorderHint" hidden>Rows ko drag karke upar-neeche karo, phir Save Order dabao.</span>
+      </div>
+    {% endif %}
   </div>
 
   {% if rows %}
     <div class="ap-table-wrap">
-      <table class="ap-table">
+      <table class="ap-table" id="apCmTable"
+             {% if show_reorder %}data-reorder-url="{% url 'main:portal_content_reorder' section.key %}"{% endif %}>
         <thead>
           <tr>
+            {% if show_reorder %}<th class="ap-drag-th" hidden>⋮⋮</th>{% endif %}
             {% for col in section.list_display %}<th>{{ col.label }}</th>{% endfor %}
             <th class="ap-cm-actions-th">Actions</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="apCmBody">
           {% for row in rows %}
-            <tr>
+            <tr data-pk="{{ row.pk }}">
+              {% if show_reorder %}<td class="ap-drag-handle" hidden title="Drag to reorder">⋮⋮</td>{% endif %}
               {% for cell in row.cells %}
                 <td>{% if cell.html %}{{ cell.value|safe }}{% else %}{{ cell.value }}{% endif %}</td>
               {% endfor %}

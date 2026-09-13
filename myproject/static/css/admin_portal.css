@@ -141,6 +141,7 @@
   border-radius: 10px; padding: 11px 14px; color: var(--ivory);
 }
 .ap-search:focus { outline: none; border-color: var(--gold-strong); }
+.ap-enq-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
 /* table */
 .ap-table-wrap { border: 1px solid var(--line-soft); border-radius: 16px; overflow: hidden; background: var(--bg-2); }

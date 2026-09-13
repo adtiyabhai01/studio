@@ -92,6 +92,8 @@
 
     /* ---------- enquiry search ---------- */
     var search = document.getElementById("apSearch");
+    var exportCsv = document.getElementById("apExportCsv");
+    var exportBase = exportCsv ? exportCsv.getAttribute("href") : "";
     if (search) {
       search.addEventListener("input", function () {
         var q = search.value.trim().toLowerCase();
@@ -99,6 +101,11 @@
           var hay = (row.dataset.query || "").toLowerCase();
           row.classList.toggle("is-filtered", q.length > 1 && hay.indexOf(q) === -1);
         });
+        // Keep the CSV export in sync with the visible search.
+        if (exportCsv && exportBase) {
+          var raw = search.value.trim();
+          exportCsv.href = raw ? exportBase + "?q=" + encodeURIComponent(raw) : exportBase;
+        }
       });
     }
 

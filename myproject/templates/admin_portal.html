@@ -146,7 +146,10 @@
           <h2 class="ap-panel-title">Recent enquiries</h2>
           <p class="ap-panel-sub">Latest {{ recent_enquiries|length }} submissions · search by name, phone or city.</p>
         </div>
-        <input class="field ap-search" id="apSearch" type="search" placeholder="Search enquiries…" aria-label="Search enquiries">
+        <div class="ap-enq-tools">
+          <input class="field ap-search" id="apSearch" type="search" placeholder="Search enquiries…" aria-label="Search enquiries">
+          <a class="btn btn--ghost btn--sm" id="apExportCsv" href="{% url 'main:portal_enquiries_export' %}" title="Saari enquiries CSV me download karo (Excel/WhatsApp broadcast ke liye)">⬇ Export CSV</a>
+        </div>
       </div>
 
       {% if recent_enquiries %}

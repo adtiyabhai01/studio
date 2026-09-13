@@ -1,10 +1,11 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from .content import TeamMemberForm
-from .models import Enquiry, TeamMember, ThemeSettings
+from .content import CONTENT_SECTIONS, TeamMemberForm
+from .models import Enquiry, PortfolioImage, TeamMember, ThemeSettings
 from .views import THEME_COLOR_KEYS
 
 
@@ -109,3 +110,131 @@ class AdminPortalTabPreservationTests(TestCase):
     def test_missing_tab_falls_back_to_plain_redirect(self):
         resp = self.client.post(self.url, {"portal_action": "maintenance"})
         self.assertRedirects(resp, self.url)
+
+
+def _tiny_gif(name="photo.gif"):
+    # 1x1 transparent GIF — valid image bytes without Pillow dependency.
+    return SimpleUploadedFile(
+        name,
+        b"GIF89a\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xff\xff\xff!"
+        b"\xf9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01"
+        b"\x00\x00\x02\x02D\x01\x00;",
+        content_type="image/gif",
+    )
+
+
+class PortalBulkUploadTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_superuser("boss", "boss@example.com", "strongpass99")
+        self.client = Client(HTTP_HOST="localhost")
+        self.client.force_login(self.user)
+        self.url = reverse("main:portal_bulk_upload")
+
+    def test_bulk_page_requires_staff(self):
+        anon = Client(HTTP_HOST="localhost")
+        resp = anon.get(self.url)
+        self.assertEqual(resp.status_code, 404)
+
+    def test_bulk_page_renders(self):
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Bulk Upload Photos")
+
+    def test_ajax_single_upload_creates_photo(self):
+        resp = self.client.post(
+            self.url,
+            {"image": _tiny_gif("shaadi-haldii.gif")},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.json()["ok"])
+        self.assertEqual(PortfolioImage.objects.count(), 1)
+        self.assertIn("haldi", PortfolioImage.objects.first().title.lower())
+
+    def test_classic_multifile_upload(self):
+        resp = self.client.post(
+            self.url,
+            {"images": [_tiny_gif("a.gif"), _tiny_gif("b.gif")]},
+        )
+        self.assertRedirects(resp, reverse("main:portal_content_list", args=["portfolio-photos"]))
+        self.assertEqual(PortfolioImage.objects.count(), 2)
+
+    def test_list_shows_bulk_and_reorder_flags(self):
+        PortfolioImage.objects.create(title="x", image=_tiny_gif("x.gif"))
+        resp = self.client.get(reverse("main:portal_content_list", args=["portfolio-photos"]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.context["show_bulk"])
+        self.assertTrue(resp.context["show_reorder"])
+        self.assertTrue(CONTENT_SECTIONS["portfolio-photos"].sortable)
+        self.assertFalse(CONTENT_SECTIONS["site-settings"].sortable)
+
+
+class PortalReorderTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_superuser("boss", "boss@example.com", "strongpass99")
+        self.client = Client(HTTP_HOST="localhost")
+        self.client.force_login(self.user)
+        self.a = PortfolioImage.objects.create(title="a", image=_tiny_gif("a.gif"), sort_order=0)
+        self.b = PortfolioImage.objects.create(title="b", image=_tiny_gif("b.gif"), sort_order=1)
+        self.c = PortfolioImage.objects.create(title="c", image=_tiny_gif("c.gif"), sort_order=2)
+        self.url = reverse("main:portal_content_reorder", args=["portfolio-photos"])
+
+    def test_reorder_persists(self):
+        import json
+
+        resp = self.client.post(
+            self.url,
+            data=json.dumps({"order": [self.c.pk, self.a.pk, self.b.pk]}),
+            content_type="application/json",
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.json()["ok"])
+        self.assertEqual(
+            list(PortfolioImage.objects.order_by("sort_order").values_list("pk", flat=True)),
+            [self.c.pk, self.a.pk, self.b.pk],
+        )
+
+    def test_reorder_rejects_empty(self):
+        import json
+
+        resp = self.client.post(
+            self.url,
+            data=json.dumps({"order": []}),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+
+
+class PortalExportTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_superuser("boss", "boss@example.com", "strongpass99")
+        self.client = Client(HTTP_HOST="localhost")
+        self.client.force_login(self.user)
+        Enquiry.objects.create(name="Aarav Sharma", phone="9811111111", city="Jaipur", status="NEW")
+        Enquiry.objects.create(name="Diya Patel", phone="9822222222", city="Udaipur", status="BOOKED")
+        self.url = reverse("main:portal_enquiries_export")
+
+    def test_export_requires_staff(self):
+        anon = Client(HTTP_HOST="localhost")
+        self.assertEqual(anon.get(self.url).status_code, 404)
+
+    def test_export_csv_has_all_rows(self):
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("text/csv", resp["Content-Type"])
+        self.assertIn("attachment", resp["Content-Disposition"])
+        body = resp.content.decode("utf-8-sig")
+        self.assertIn("Aarav Sharma", body)
+        self.assertIn("Diya Patel", body)
+        self.assertIn("9811111111", body)
+
+    def test_export_filter_by_search_and_status(self):
+        resp = self.client.get(self.url, {"q": "diya"})
+        body = resp.content.decode("utf-8-sig")
+        self.assertNotIn("Aarav Sharma", body)
+        self.assertIn("Diya Patel", body)
+        resp = self.client.get(self.url, {"status": "BOOKED"})
+        body = resp.content.decode("utf-8-sig")
+        self.assertNotIn("Aarav Sharma", body)
+        self.assertIn("Diya Patel", body)

@@ -285,3 +285,55 @@
   .ap-cm-actions .btn { width: 100%; }
   .ap-cm-del--link { margin-left: 0; }
 }
+
+/* ---------- bulk upload ---------- */
+.ap-drop {
+  margin-top: 18px;
+  border: 1.5px dashed var(--line);
+  border-radius: 14px;
+  padding: 30px 22px;
+  text-align: center;
+  background: #16130f;
+  transition: border-color var(--tr), background var(--tr);
+}
+.ap-drop.is-drag { border-color: var(--gold-strong); background: rgba(178,138,84,0.08); }
+.ap-drop-title { font-size: 0.95rem; color: var(--ivory); margin-bottom: 8px; }
+.ap-drop-browse {
+  background: none; border: none; cursor: pointer;
+  color: var(--gold-strong); text-decoration: underline; font-size: inherit;
+}
+.ap-bulk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+.ap-bulk-card {
+  position: relative;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #16130f;
+}
+.ap-bulk-card img { width: 100%; height: 92px; object-fit: cover; display: block; }
+.ap-bulk-card span {
+  display: block; font-size: 0.7rem; color: var(--muted);
+  padding: 6px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ap-bulk-card button {
+  position: absolute; top: 6px; right: 6px;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(0,0,0,0.7); color: #fff; border: 1px solid var(--line);
+  cursor: pointer; font-size: 0.7rem; line-height: 1;
+}
+.ap-bulk-bar { margin-top: 16px; }
+
+/* ---------- reorder ---------- */
+.ap-cm-toolbar { flex-wrap: wrap; }
+.ap-reorder-tools { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-wrap: wrap; }
+.ap-drag-th, .ap-drag-handle { width: 44px; text-align: center; }
+.ap-drag-handle { cursor: grab; color: var(--gold-strong); font-size: 1rem; user-select: none; }
+tr.is-reorder { cursor: grab; }
+tr.is-reorder td { border-top: 1px dashed rgba(178,138,84,0.35); }
+tr.is-dragging { opacity: 0.45; }
+tr.is-over { outline: 2px solid var(--gold); }

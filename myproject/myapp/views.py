@@ -1,4 +1,6 @@
+import csv
 import json
+import os
 import re
 import urllib.parse
 import urllib.request
@@ -6,12 +8,14 @@ import urllib.request
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.core.paginator import Paginator
-from django.db.models import Q
-from django.http import Http404, JsonResponse
+from django.db import transaction
+from django.db.models import Max, Q
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
 
 from .content import CONTENT_SECTIONS
 from .health import HEALTH_LABELS, build_health_report
@@ -873,6 +877,9 @@ def portal_content_list(request, key):
         for field in section.search_fields:
             lookup |= Q(**{f"{field}__icontains": query})
         queryset = queryset.filter(lookup)
+    elif section.sortable and not query:
+        # Stable order for drag-drop reordering.
+        queryset = queryset.order_by("sort_order", "id")
 
     page_obj = Paginator(queryset, section.per_page).get_page(request.GET.get("page"))
 
@@ -890,6 +897,10 @@ def portal_content_list(request, key):
         "rows": rows,
         "page_obj": page_obj,
         "query": query,
+        # Bulk upload is only offered for portfolio photos (multi-image workflow).
+        "show_bulk": key == "portfolio-photos",
+        # Reorder only makes sense on the unfiltered, unsearched list.
+        "show_reorder": bool(section.sortable and not query and rows),
     }
     return render(request, "admin_portal/content_list.html", context)
 
@@ -974,3 +985,204 @@ def portal_content_delete(request, key, pk):
         "object": obj,
     }
     return render(request, "admin_portal/content_confirm_delete.html", context)
+
+
+# ---------------------------------------------------------------------------
+# Bulk photo upload + drag-drop reorder + enquiries CSV export
+# ---------------------------------------------------------------------------
+
+
+def _is_ajax(request):
+    return request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+
+def _title_from_filename(filename):
+    base = os.path.splitext(os.path.basename(filename or ""))[0]
+    base = re.sub(r"[_-]+", " ", base).strip()
+    return base[:200]
+
+
+def portal_bulk_upload(request):
+    """Bulk upload page for portfolio photos.
+
+    GET renders the dropzone. POST accepts either:
+    - AJAX single-file upload (JS sends files one-by-one to stay under the
+      Vercel ~4.5 MB serverless body limit) -> returns JSON.
+    - Classic multi-file form (local dev fallback, input name="images")
+      -> saves all and redirects to the list.
+    """
+    from .models import PortfolioCategory, PortfolioImage
+
+    section = _portal_section(request, "portfolio-photos")
+    categories = list(PortfolioCategory.objects.filter(is_active=True).order_by("sort_order", "name"))
+
+    if request.method == "POST":
+        category = None
+        category_id = (request.POST.get("category") or "").strip()
+        if category_id.isdigit():
+            category = PortfolioCategory.objects.filter(pk=int(category_id)).first()
+        is_featured = request.POST.get("is_featured") == "on"
+        is_active = request.POST.get("is_active", "on") == "on"
+
+        def _create_one(upload):
+            content_type = getattr(upload, "content_type", "") or ""
+            if not content_type.startswith("image/"):
+                return None, "not an image"
+            if upload.size and upload.size > 512 * 1024 * 1024:
+                return None, "file too large"
+            start = PortfolioImage.objects.aggregate(m=Max("sort_order"))["m"] or 0
+            obj = PortfolioImage(
+                category=category,
+                title=_title_from_filename(getattr(upload, "name", "")),
+                image=upload,
+                is_featured=is_featured,
+                is_active=is_active,
+                sort_order=start + 1,
+            )
+            try:
+                obj.full_clean(exclude=["image"])
+            except Exception:
+                pass
+            obj.save()
+            return obj, ""
+
+        if _is_ajax(request):
+            upload = request.FILES.get("image") or request.FILES.get("images")
+            if upload is None:
+                files = request.FILES.getlist("images")
+                upload = files[0] if files else None
+            if upload is None:
+                return JsonResponse({"ok": False, "error": "No image received."}, status=400)
+            try:
+                obj, err = _create_one(upload)
+            except Exception as exc:
+                return JsonResponse({"ok": False, "error": str(exc)[:300]}, status=400)
+            if obj is None:
+                return JsonResponse({"ok": False, "error": err or "Rejected."}, status=400)
+            thumb = ""
+            try:
+                thumb = obj.image.url
+            except Exception:
+                thumb = ""
+            return JsonResponse({"ok": True, "id": obj.pk, "title": obj.title, "thumb": thumb})
+
+        # Classic multi-file fallback.
+        files = request.FILES.getlist("images") or request.FILES.getlist("image")
+        if not files:
+            messages.error(request, "Koi photo select nahi ki — pehle photos chuno.")
+            return redirect("main:portal_bulk_upload")
+        saved, skipped = 0, 0
+        with transaction.atomic():
+            for upload in files:
+                try:
+                    obj, err = _create_one(upload)
+                    if obj is None:
+                        skipped += 1
+                    else:
+                        saved += 1
+                except Exception:
+                    skipped += 1
+        if saved:
+            messages.success(request, f"{saved} photo(s) upload ho gayi." + (f" {skipped} skip hui." if skipped else ""))
+        else:
+            messages.error(request, "Koi photo save nahi hui — sirf image files (JPG/PNG/WebP) chuno.")
+        return redirect("main:portal_content_list", key="portfolio-photos")
+
+    context = {
+        "section": section,
+        "categories": categories,
+    }
+    return render(request, "admin_portal/bulk_upload.html", context)
+
+
+@require_POST
+def portal_content_reorder(request, key):
+    """Persist drag-drop order: JSON body {"order": [pk, pk, ...]}."""
+    section = _portal_section(request, key)
+    if not section.sortable:
+        return JsonResponse({"ok": False, "error": "Not sortable."}, status=400)
+    try:
+        payload = json.loads(request.body or b"{}")
+    except Exception:
+        return JsonResponse({"ok": False, "error": "Invalid JSON."}, status=400)
+    order = payload.get("order") or []
+    if not isinstance(order, list) or not order:
+        return JsonResponse({"ok": False, "error": "Empty order."}, status=400)
+    # Keep it sane: ints only, deduped, max 500 per save.
+    clean = []
+    seen = set()
+    for pk in order[:500]:
+        try:
+            pk_int = int(pk)
+        except (TypeError, ValueError):
+            continue
+        if pk_int in seen:
+            continue
+        seen.add(pk_int)
+        clean.append(pk_int)
+    if not clean:
+        return JsonResponse({"ok": False, "error": "No valid ids."}, status=400)
+
+    model = section.model
+    existing = {obj.pk: obj for obj in model.objects.filter(pk__in=clean)}
+    to_update = []
+    for index, pk in enumerate(clean):
+        obj = existing.get(pk)
+        if obj is None:
+            continue
+        if obj.sort_order != index:
+            obj.sort_order = index
+            to_update.append(obj)
+    if to_update:
+        with transaction.atomic():
+            model.objects.bulk_update(to_update, ["sort_order"])
+    return JsonResponse({"ok": True, "updated": len(to_update)})
+
+
+@require_GET
+def portal_enquiries_export(request):
+    """Download all enquiries as Excel-friendly CSV (UTF-8 BOM).
+
+    Optional filters: ?q=<search> &status=<NEW|CONTACTED|...>
+    Staff only.
+    """
+    can_manage = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+    if not can_manage:
+        raise Http404("Not found")
+
+    qs = Enquiry.objects.select_related("service").order_by("-created_at")
+    status = (request.GET.get("status") or "").strip().upper()
+    valid_statuses = {value for value, _label in ENQUIRY_STATUS}
+    if status in valid_statuses:
+        qs = qs.filter(status=status)
+    q = (request.GET.get("q") or "").strip()
+    if q:
+        qs = qs.filter(Q(name__icontains=q) | Q(phone__icontains=q) | Q(city__icontains=q) | Q(email__icontains=q))
+
+    stamp = timezone.localtime(timezone.now()).strftime("%Y%m%d-%H%M")
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="enquiries-{stamp}.csv"'
+    response.write("\ufeff")  # BOM so Excel shows Hindi/emoji correctly
+    writer = csv.writer(response)
+    writer.writerow([
+        "ID", "Name", "Phone", "Email", "Service", "Event Date",
+        "City", "Budget", "Status", "Message", "Notes", "Created At",
+    ])
+    budget_map = dict(BUDGET_CHOICES)
+    status_map = dict(ENQUIRY_STATUS)
+    for e in qs.iterator(chunk_size=500):
+        writer.writerow([
+            e.pk,
+            e.name,
+            e.phone,
+            e.email,
+            e.service.name if e.service else "",
+            e.event_date.isoformat() if e.event_date else "",
+            e.city,
+            budget_map.get(e.budget, e.budget),
+            status_map.get(e.status, e.status),
+            e.message,
+            e.notes,
+            timezone.localtime(e.created_at).strftime("%Y-%m-%d %H:%M") if e.created_at else "",
+        ])
+    return response
