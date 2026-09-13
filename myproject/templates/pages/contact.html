@@ -77,6 +77,7 @@
               <label for="{{ form.event_date.id_for_label }}">Event date</label>
               {{ form.event_date }}
               {{ form.event_date.errors }}
+              <p class="form-hint">Past dates can't be booked. <a href="{% url 'main:availability' %}">Check free dates →</a></p>
             </div>
           </div>
 

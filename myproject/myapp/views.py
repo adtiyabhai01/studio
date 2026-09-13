@@ -1,9 +1,11 @@
+import calendar
 import csv
 import json
 import os
 import re
 import urllib.parse
 import urllib.request
+from datetime import date
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -239,6 +241,7 @@ from .forms import EnquiryForm
 from .models import (
     BODY_FONTS,
     BUDGET_CHOICES,
+    Booking,
     ENQUIRY_STATUS,
     HEADING_FONTS,
     City,
@@ -462,6 +465,46 @@ def portfolio(request):
     return render(request, "pages/portfolio.html", context)
 
 
+def availability(request):
+    """Public month calendar. Past dates are disabled, booked/blocked dates
+    are marked — only today + future free dates link to the enquiry form."""
+    today = timezone.localdate()
+    try:
+        year = int(request.GET.get("y", today.year))
+        month = int(request.GET.get("m", today.month))
+    except (TypeError, ValueError):
+        year, month = today.year, today.month
+    # Clamp: no months before the current one, max 12 months ahead.
+    first_allowed = date(today.year, today.month, 1)
+    total = today.month - 1 + 12
+    last_allowed = date(today.year + total // 12, total % 12 + 1, 1)
+    wanted = date(year, month, 1) if 1 <= month <= 12 and 1900 <= year <= 2200 else first_allowed
+    wanted = min(max(wanted, first_allowed), last_allowed)
+
+    cal = calendar.Calendar(firstweekday=0)  # Monday first
+    weeks = cal.monthdatescalendar(wanted.year, wanted.month)
+    month_start, month_end = weeks[0][0], weeks[-1][-1]
+    booked = {
+        b.date: b.status
+        for b in Booking.objects.filter(date__gte=month_start, date__lte=month_end)
+    }
+
+    prev_m = date(wanted.year - (1 if wanted.month == 1 else 0), 12 if wanted.month == 1 else wanted.month - 1, 1)
+    next_m = date(wanted.year + (1 if wanted.month == 12 else 0), 1 if wanted.month == 12 else wanted.month + 1, 1)
+    context = {
+        "active": "availability",
+        "today": today,
+        "wanted": wanted,
+        "weeks": weeks,
+        "booked": booked,
+        "prev_y": prev_m.year if prev_m >= first_allowed else None,
+        "prev_m": prev_m.month if prev_m >= first_allowed else None,
+        "next_y": next_m.year if next_m <= last_allowed else None,
+        "next_m": next_m.month if next_m <= last_allowed else None,
+    }
+    return render(request, "pages/availability.html", context)
+
+
 def packages(request):
     groups = {}
     for label in ["affordable", "classic", "premium", "luxury"]:
@@ -513,6 +556,16 @@ def contact(request):
         initial["message"] = f"I'm interested in the '{package}' package."
     elif offer:
         initial["message"] = f"I'm interested in the '{offer}' offer."
+
+    # Prefill from the availability calendar (?date=YYYY-MM-DD, future only).
+    picked = (request.GET.get("date") or "").strip()
+    if picked:
+        try:
+            picked_date = date.fromisoformat(picked)
+        except ValueError:
+            picked_date = None
+        if picked_date and picked_date >= timezone.localdate():
+            initial["event_date"] = picked_date.isoformat()
 
     if request.method == "POST":
         form = EnquiryForm(request.POST)
@@ -589,6 +642,11 @@ PORTAL_LINKS = [
         "key": "cities",
         "name": "Cities",
         "desc": "Cities you serve",
+    },
+    {
+        "key": "bookings",
+        "name": "Bookings",
+        "desc": "Block or book calendar dates",
     },
     {
         "key": "hero-videos",

@@ -1,4 +1,5 @@
 from django import forms
+from django.utils import timezone
 
 from .models import BUDGET_CHOICES, Enquiry, Service
 
@@ -55,3 +56,11 @@ class EnquiryForm(forms.ModelForm):
         self.fields["service"].empty_label = "Select a service"
         self.fields["budget"].choices = BUDGET_CHOICES
         self.fields["phone"].help_text = ""
+        # Browser-level guard: date picker won't offer past dates.
+        self.fields["event_date"].widget.attrs["min"] = timezone.localdate().isoformat()
+
+    def clean_event_date(self):
+        value = self.cleaned_data.get("event_date")
+        if value and value < timezone.localdate():
+            raise forms.ValidationError("Past dates cannot be booked. Please choose today or a future date.")
+        return value

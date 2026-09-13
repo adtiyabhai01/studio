@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static portal_extras %}
+
+{% block title %}Check Availability — {{ site.brand_name }}{% endblock %}
+{% block meta_description %}See which dates are free and book yours. Past dates are closed — only today and future dates can be enquired.{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/availability.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="page-hero page-hero--availability">
+  <div class="container">
+    <p class="eyebrow eyebrow--gold reveal">Plan ahead</p>
+    <h1 class="page-hero-title reveal">Check <em>availability</em></h1>
+    <p class="page-hero-sub reveal">Green dates are free — tap one to start your enquiry. Grey dates are gone.</p>
+  </div>
+</section>
+
+<section class="section section--pad">
+  <div class="container avail-wrap">
+
+    <div class="avail-nav reveal">
+      {% if prev_y %}
+        <a class="btn btn--ghost btn--sm" href="{% url 'main:availability' %}?y={{ prev_y }}&m={{ prev_m }}" aria-label="Previous month">← Prev</a>
+      {% else %}
+        <span class="btn btn--ghost btn--sm is-disabled">← Prev</span>
+      {% endif %}
+      <h2 class="avail-month">{{ wanted|date:"F Y" }}</h2>
+      {% if next_y %}
+        <a class="btn btn--ghost btn--sm" href="{% url 'main:availability' %}?y={{ next_y }}&m={{ next_m }}" aria-label="Next month">Next →</a>
+      {% else %}
+        <span class="btn btn--ghost btn--sm is-disabled">Next →</span>
+      {% endif %}
+    </div>
+
+    <div class="avail-legend reveal">
+      <span class="avail-key"><i class="dot dot--free"></i>Available</span>
+      <span class="avail-key"><i class="dot dot--booked"></i>Booked</span>
+      <span class="avail-key"><i class="dot dot--blocked"></i>Unavailable</span>
+      <span class="avail-key"><i class="dot dot--past"></i>Past</span>
+    </div>
+
+    <div class="avail-cal reveal" role="grid" aria-label="Availability for {{ wanted|date:'F Y' }}">
+      <div class="avail-dow" aria-hidden="true">
+        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+      </div>
+      {% for week in weeks %}
+        <div class="avail-week">
+          {% for day in week %}
+            {% if day.month != wanted.month %}
+              <span class="avail-day is-out" aria-hidden="true">{{ day.day }}</span>
+            {% elif day < today %}
+              <span class="avail-day is-past" aria-label="{{ day }} past">{{ day.day }}</span>
+            {% else %}
+              {% with mark=booked|dict_get:day %}
+                {% if mark == "BOOKED" %}
+                  <span class="avail-day is-booked" title="Booked — {{ day|date:'d M Y' }}">{{ day.day }}<em>Booked</em></span>
+                {% elif mark == "BLOCKED" %}
+                  <span class="avail-day is-blocked" title="Unavailable — {{ day|date:'d M Y' }}">{{ day.day }}<em>Busy</em></span>
+                {% else %}
+                  <a class="avail-day is-free" href="{% url 'main:contact' %}?date={{ day|date:'Y-m-d' }}" title="Free — tap to enquire for {{ day|date:'d M Y' }}">{{ day.day }}</a>
+                {% endif %}
+              {% endwith %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="avail-cta reveal">
+      <p>Found your date? Lock it before someone else does.</p>
+      <a class="btn btn--gold btn--lg" href="{% url 'main:contact' %}">Enquire Now</a>
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}

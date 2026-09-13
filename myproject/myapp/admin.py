@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 
 from .models import (
+    Booking,
     City,
     Enquiry,
     ErrorLog,
@@ -290,6 +291,15 @@ class EnquiryAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.status = obj.status or "NEW"
         super().save_model(request, obj, form, change)
+
+
+@admin.register(Booking)
+class BookingAdmin(admin.ModelAdmin):
+    list_display = ("date", "status", "client_name", "service")
+    list_filter = ("status", "service")
+    search_fields = ("client_name", "notes")
+    date_hierarchy = "date"
+    ordering = ("date",)
 
 
 @admin.register(City)

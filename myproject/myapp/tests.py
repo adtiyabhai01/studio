@@ -3,9 +3,13 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils import timezone
+
+from datetime import date as cal_date
 
 from .content import CONTENT_SECTIONS, TeamMemberForm
-from .models import Enquiry, PortfolioImage, TeamMember, ThemeSettings
+from .forms import EnquiryForm
+from .models import Booking, Enquiry, PortfolioImage, TeamMember, ThemeSettings
 from .views import THEME_COLOR_KEYS
 
 
@@ -266,3 +270,82 @@ class CuratedFontsTests(TestCase):
         for old, new in RETIRED_FONT_MAP.items():
             self.assertIn(new, valid)
             self.assertNotIn(old, valid)
+
+
+class AvailabilityCalendarTests(TestCase):
+    def test_past_booking_rejected(self):
+        yesterday = timezone.localdate() - timezone.timedelta(days=1)
+        with self.assertRaises(ValidationError):
+            Booking.objects.create(date=yesterday, status="BOOKED")
+
+    def test_today_and_future_booking_allowed(self):
+        today = timezone.localdate()
+        Booking.objects.create(date=today, status="BOOKED", client_name="Aarav")
+        Booking.objects.create(
+            date=today + timezone.timedelta(days=30), status="BLOCKED", notes="Diwali"
+        )
+        self.assertEqual(Booking.objects.count(), 2)
+
+    def test_availability_page_marks_booked(self):
+        today = timezone.localdate()
+        target = today + timezone.timedelta(days=5)
+        Booking.objects.create(date=target, status="BOOKED", client_name="Diya")
+        client = Client(HTTP_HOST="localhost")
+        resp = client.get(f"/availability/?y={target.year}&m={target.month}")
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(target, resp.context["booked"])
+        self.assertEqual(resp.context["booked"][target], "BOOKED")
+        self.assertContains(resp, "is-booked")
+
+    def test_availability_clamps_past_month(self):
+        today = timezone.localdate()
+        client = Client(HTTP_HOST="localhost")
+        resp = client.get("/availability/?y=2000&m=1")
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.context["wanted"], cal_date(today.year, today.month, 1))
+
+    def test_enquiry_form_rejects_past_date(self):
+        yesterday = timezone.localdate() - timezone.timedelta(days=1)
+        form = EnquiryForm(
+            data={
+                "name": "A",
+                "phone": "9811111111",
+                "budget": "under_25000",
+                "event_date": yesterday.isoformat(),
+            }
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("event_date", form.errors)
+
+    def test_enquiry_form_accepts_future_date(self):
+        future = timezone.localdate() + timezone.timedelta(days=10)
+        form = EnquiryForm(
+            data={
+                "name": "A",
+                "phone": "9811111111",
+                "budget": "under_25000",
+                "event_date": future.isoformat(),
+            }
+        )
+        self.assertTrue(form.is_valid())
+
+    def test_contact_prefills_future_date_only(self):
+        client = Client(HTTP_HOST="localhost")
+        future = (timezone.localdate() + timezone.timedelta(days=7)).isoformat()
+        past = (timezone.localdate() - timezone.timedelta(days=7)).isoformat()
+        resp = client.get(f"/contact/?date={future}")
+        self.assertEqual(resp.context["form"].initial.get("event_date"), future)
+        resp = client.get(f"/contact/?date={past}")
+        self.assertNotIn("event_date", resp.context["form"].initial)
+
+    def test_bookings_portal_requires_staff(self):
+        anon = Client(HTTP_HOST="localhost")
+        self.assertEqual(
+            anon.get(reverse("main:portal_content_list", args=["bookings"])).status_code, 404
+        )
+        user = User.objects.create_superuser("boss", "boss@example.com", "strongpass99")
+        staff = Client(HTTP_HOST="localhost")
+        staff.force_login(user)
+        resp = staff.get(reverse("main:portal_content_list", args=["bookings"]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Bookings")

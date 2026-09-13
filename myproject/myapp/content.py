@@ -13,6 +13,7 @@ from django.utils.html import format_html
 from django.utils.text import slugify
 
 from .models import (
+    Booking,
     City,
     HeroVideo,
     Offer,
@@ -258,6 +259,21 @@ class TestimonialForm(PortalModelForm):
                 attrs={"rows": 5, "placeholder": "What did the client say?"}
             ),
         }
+
+
+class BookingForm(PortalModelForm):
+    class Meta:
+        model = Booking
+        fields = ["date", "status", "client_name", "service", "notes"]
+        widgets = {
+            "client_name": forms.TextInput(attrs={"placeholder": "e.g. Aarav & Diya"}),
+            "notes": forms.TextInput(attrs={"placeholder": "Internal note — never shown publicly"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["service"].queryset = Service.objects.order_by("sort_order", "name")
+        self.fields["service"].empty_label = "— No specific service —"
 
 
 class PortfolioImageForm(PortalModelForm):
@@ -551,6 +567,22 @@ CONTENT_SECTIONS = {
             {"label": "Sort", "value": "sort_order"},
         ],
         search_fields=["name"],
+    ),
+    "bookings": ContentSection(
+        key="bookings",
+        model=Booking,
+        form=BookingForm,
+        name="Bookings",
+        singular="booking",
+        desc="Block or book dates on the availability calendar",
+        list_display=[
+            {"label": "Date", "value": lambda o: o.date.strftime("%d %b %Y")},
+            {"label": "Day", "value": lambda o: o.date.strftime("%A")},
+            {"label": "Status", "value": lambda o: o.get_status_display()},
+            {"label": "Client", "value": lambda o: o.client_name or "—"},
+            {"label": "Service", "value": lambda o: o.service.name if o.service else "—"},
+        ],
+        search_fields=["client_name", "notes"],
     ),
     "hero-videos": ContentSection(
         key="hero-videos",

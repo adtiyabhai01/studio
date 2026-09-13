@@ -745,6 +745,49 @@ class Enquiry(models.Model):
 
 
 # ---------------------------------------------------------------------------
+# Bookings / availability calendar
+# ---------------------------------------------------------------------------
+
+BOOKING_STATUS = [
+    ("BOOKED", "Booked"),
+    ("BLOCKED", "Blocked"),
+]
+
+
+class Booking(TimeStampedModel):
+    """One row per unavailable date shown on the public availability calendar.
+
+    BOOKED = client event locked in. BLOCKED = studio unavailable (holiday,
+    travel, maintenance). Past dates can never be booked — enforced here and
+    in the enquiry form.
+    """
+
+    date = models.DateField(unique=True, db_index=True, help_text="Only today or a future date.")
+    status = models.CharField(max_length=20, choices=BOOKING_STATUS, default="BOOKED", db_index=True)
+    client_name = models.CharField(max_length=120, blank=True)
+    service = models.ForeignKey(
+        Service, on_delete=models.SET_NULL, null=True, blank=True, related_name="bookings"
+    )
+    notes = models.CharField(max_length=300, blank=True, help_text="Internal note, never shown publicly.")
+
+    class Meta:
+        ordering = ["date"]
+
+    def __str__(self):
+        label = self.client_name or dict(BOOKING_STATUS).get(self.status, self.status)
+        return f"{self.date.isoformat()} — {label}"
+
+    def clean(self):
+        super().clean()
+        if self.date and self.date < timezone.localdate():
+            raise ValidationError({"date": "Past dates cannot be booked. Choose today or a future date."})
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+
+# ---------------------------------------------------------------------------
 # Hero videos
 # ---------------------------------------------------------------------------
 
