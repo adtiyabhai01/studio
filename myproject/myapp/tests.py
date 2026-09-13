@@ -238,3 +238,31 @@ class PortalExportTests(TestCase):
         body = resp.content.decode("utf-8-sig")
         self.assertNotIn("Aarav Sharma", body)
         self.assertIn("Diya Patel", body)
+
+
+class CuratedFontsTests(TestCase):
+    def test_six_headings_six_body(self):
+        from .models import BODY_FONTS, HEADING_FONTS
+
+        self.assertEqual(len(HEADING_FONTS), 6)
+        self.assertEqual(len(BODY_FONTS), 6)
+        self.assertEqual(HEADING_FONTS[0][1], "Playfair Display")
+        self.assertEqual(BODY_FONTS[0][1], "Manrope")
+
+    def test_presets_use_valid_curated_fonts(self):
+        from .models import BODY_FONTS, HEADING_FONTS, THEME_PRESETS
+
+        heading_stacks = {stack for stack, _label in HEADING_FONTS}
+        body_stacks = {stack for stack, _label in BODY_FONTS}
+        for preset in THEME_PRESETS:
+            self.assertIn(preset["heading"], heading_stacks, preset["key"])
+            self.assertIn(preset["body"], body_stacks, preset["key"])
+
+    def test_retired_map_targets_are_curated(self):
+        from .models import BODY_FONTS, HEADING_FONTS, RETIRED_FONT_MAP
+
+        valid = {stack for stack, _label in HEADING_FONTS + BODY_FONTS}
+        self.assertTrue(len(RETIRED_FONT_MAP) >= 15)
+        for old, new in RETIRED_FONT_MAP.items():
+            self.assertIn(new, valid)
+            self.assertNotIn(old, valid)

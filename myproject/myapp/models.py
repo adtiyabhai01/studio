@@ -149,37 +149,64 @@ class SiteVisit(models.Model):
         return ", ".join(self.pages or [])
 
 
+# ---------------------------------------------------------------------------
+# Curated enterprise font stacks (6 headings + 6 body).
+# Kept deliberately small: timeless luxury serifs for headings, proven
+# enterprise sans-serifs for body. Stack strings of kept fonts are unchanged
+# so existing saved themes keep working without a data rewrite.
+# ---------------------------------------------------------------------------
+
+FONT_PLAYFAIR = "'Playfair Display', Georgia, serif"
+FONT_CORMORANT = "'Cormorant Garamond', Georgia, serif"
+FONT_FRAUNCES = "'Fraunces', Georgia, serif"
+FONT_BASKERVILLE = "'Libre Baskerville', Georgia, serif"
+FONT_MARCELLUS = "'Marcellus', Georgia, serif"
+FONT_MONTSERRAT_HEAD = "'Montserrat', 'Segoe UI', sans-serif"
+
+FONT_MANROPE = "Manrope, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+FONT_INTER = "Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+FONT_JAKARTA = "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+FONT_OUTFIT = "Outfit, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+FONT_MONTSERRAT_BODY = "Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+FONT_POPPINS = "Poppins, -apple-system, BlinkMacSystemFont, sans-serif"
+
 HEADING_FONTS = [
-    ("'Playfair Display', Georgia, serif", "Playfair Display"),
-    ("'Cormorant Garamond', Georgia, serif", "Cormorant Garamond"),
-    ("'Marcellus', Georgia, serif", "Marcellus"),
-    ("'Libre Baskerville', Georgia, serif", "Libre Baskerville"),
-    ("'EB Garamond', Georgia, serif", "EB Garamond"),
-    ("'Cinzel', Georgia, serif", "Cinzel"),
-    ("'Bodoni Moda', Georgia, serif", "Bodoni Moda"),
-    ("'Fraunces', Georgia, serif", "Fraunces"),
-    ("'Prata', Georgia, serif", "Prata"),
-    ("'Italiana', Georgia, serif", "Italiana"),
-    ("'Lora', Georgia, serif", "Lora"),
-    ("'Josefin Sans', 'Segoe UI', sans-serif", "Josefin Sans"),
-    ("'Tenor Sans', 'Segoe UI', sans-serif", "Tenor Sans"),
+    (FONT_PLAYFAIR, "Playfair Display"),
+    (FONT_CORMORANT, "Cormorant Garamond"),
+    (FONT_FRAUNCES, "Fraunces"),
+    (FONT_BASKERVILLE, "Libre Baskerville"),
+    (FONT_MARCELLUS, "Marcellus"),
+    (FONT_MONTSERRAT_HEAD, "Montserrat"),
 ]
 
 BODY_FONTS = [
-    ("Manrope, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "Manrope"),
-    ("Poppins, -apple-system, BlinkMacSystemFont, sans-serif", "Poppins"),
-    ("Inter, -apple-system, BlinkMacSystemFont, sans-serif", "Inter"),
-    ("Jost, -apple-system, BlinkMacSystemFont, sans-serif", "Jost"),
-    ("'Nunito Sans', -apple-system, BlinkMacSystemFont, sans-serif", "Nunito Sans"),
-    ("Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "Montserrat"),
-    ("'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "Open Sans"),
-    ("Lato, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "Lato"),
-    ("Raleway, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "Raleway"),
-    ("'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "Work Sans"),
-    ("'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "Plus Jakarta Sans"),
-    ("Outfit, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "Outfit"),
-    ("Mulish, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", "Mulish"),
+    (FONT_MANROPE, "Manrope"),
+    (FONT_INTER, "Inter"),
+    (FONT_JAKARTA, "Plus Jakarta Sans"),
+    (FONT_OUTFIT, "Outfit"),
+    (FONT_MONTSERRAT_BODY, "Montserrat"),
+    (FONT_POPPINS, "Poppins"),
 ]
+
+# Map of retired font stacks -> closest curated replacement, applied by
+# migration 0014 so saved themes never point at a removed choice.
+RETIRED_FONT_MAP = {
+    "'EB Garamond', Georgia, serif": FONT_CORMORANT,
+    "'Cinzel', Georgia, serif": FONT_MARCELLUS,
+    "'Bodoni Moda', Georgia, serif": FONT_PLAYFAIR,
+    "'Prata', Georgia, serif": FONT_PLAYFAIR,
+    "'Italiana', Georgia, serif": FONT_MARCELLUS,
+    "'Lora', Georgia, serif": FONT_BASKERVILLE,
+    "'Josefin Sans', 'Segoe UI', sans-serif": FONT_MONTSERRAT_HEAD,
+    "'Tenor Sans', 'Segoe UI', sans-serif": FONT_MONTSERRAT_HEAD,
+    "Jost, -apple-system, BlinkMacSystemFont, sans-serif": FONT_OUTFIT,
+    "'Nunito Sans', -apple-system, BlinkMacSystemFont, sans-serif": FONT_MANROPE,
+    "'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif": FONT_INTER,
+    "Lato, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif": FONT_INTER,
+    "Raleway, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif": FONT_MONTSERRAT_BODY,
+    "'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif": FONT_INTER,
+    "Mulish, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif": FONT_MANROPE,
+}
 
 DEFAULT_FONT_STACKS = {
     "heading": HEADING_FONTS[0][0],
@@ -233,8 +260,8 @@ THEME_PRESETS = [
         "key": "noir_gold",
         "name": "Noir & Gold",
         "description": "Classic studio black with warm gold accents.",
-        "heading": HEADING_FONTS[0][0],
-        "body": BODY_FONTS[0][0],
+        "heading": FONT_PLAYFAIR,
+        "body": FONT_MANROPE,
         "colors": {
             "background": "#0f0d0c",
             "background_secondary": "#141211",
@@ -254,8 +281,8 @@ THEME_PRESETS = [
         "key": "midnight_champagne",
         "name": "Midnight & Champagne",
         "description": "Deep navy-black with elegant champagne highlights.",
-        "heading": HEADING_FONTS[1][0],
-        "body": BODY_FONTS[3][0],
+        "heading": FONT_CORMORANT,
+        "body": FONT_OUTFIT,
         "colors": {
             "background": "#0b1017",
             "background_secondary": "#10161f",
@@ -275,8 +302,8 @@ THEME_PRESETS = [
         "key": "forest_brass",
         "name": "Forest & Brass",
         "description": "Dark botanical green with aged brass accents.",
-        "heading": HEADING_FONTS[2][0],
-        "body": BODY_FONTS[3][0],
+        "heading": FONT_MARCELLUS,
+        "body": FONT_OUTFIT,
         "colors": {
             "background": "#0d120e",
             "background_secondary": "#121912",
@@ -296,8 +323,8 @@ THEME_PRESETS = [
         "key": "bordeaux_rosegold",
         "name": "Bordeaux & Rose Gold",
         "description": "Warm plum-black with soft rose gold glow.",
-        "heading": HEADING_FONTS[0][0],
-        "body": BODY_FONTS[0][0],
+        "heading": FONT_PLAYFAIR,
+        "body": FONT_MANROPE,
         "colors": {
             "background": "#140e0e",
             "background_secondary": "#1a1212",
@@ -317,8 +344,8 @@ THEME_PRESETS = [
         "key": "slate_silver",
         "name": "Slate & Silver",
         "description": "Editorial charcoal with cool silver accents.",
-        "heading": HEADING_FONTS[3][0],
-        "body": BODY_FONTS[2][0],
+        "heading": FONT_BASKERVILLE,
+        "body": FONT_INTER,
         "colors": {
             "background": "#121315",
             "background_secondary": "#181a1c",
@@ -338,8 +365,8 @@ THEME_PRESETS = [
         "key": "sapphire_platinum",
         "name": "Sapphire & Platinum",
         "description": "Midnight blue-black with platinum steel accents.",
-        "heading": HEADING_FONTS[1][0],
-        "body": BODY_FONTS[2][0],
+        "heading": FONT_CORMORANT,
+        "body": FONT_INTER,
         "colors": {
             "background": "#0a0e16",
             "background_secondary": "#101621",
@@ -359,8 +386,8 @@ THEME_PRESETS = [
         "key": "ivory_copper",
         "name": "Ivory & Copper",
         "description": "Bright, airy ivory theme with warm copper accents.",
-        "heading": HEADING_FONTS[0][0],
-        "body": BODY_FONTS[1][0],
+        "heading": FONT_PLAYFAIR,
+        "body": FONT_POPPINS,
         "colors": {
             "background": "#f6f0e5",
             "background_secondary": "#efe7d8",
