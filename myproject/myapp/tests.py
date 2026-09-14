@@ -349,3 +349,25 @@ class AvailabilityCalendarTests(TestCase):
         resp = staff.get(reverse("main:portal_content_list", args=["bookings"]))
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "Bookings")
+
+
+class VisitorIndiaTimeTests(TestCase):
+    def test_timezone_is_ist(self):
+        from django.conf import settings
+
+        self.assertEqual(settings.TIME_ZONE, "Asia/Kolkata")
+
+    def test_visitors_tab_shows_ist_12h(self):
+        import datetime
+
+        from .models import SiteVisit
+
+        user = User.objects.create_superuser("boss", "boss@example.com", "strongpass99")
+        staff = Client(HTTP_HOST="localhost")
+        staff.force_login(user)
+        # 12:00 UTC == 17:30 IST -> must render "5:30 PM", not UTC "12:00 PM".
+        utc_noon = datetime.datetime(2026, 9, 10, 12, 0, tzinfo=datetime.timezone.utc)
+        SiteVisit.objects.create(ip="1.2.3.4", device_type="Mobile", last_seen=utc_noon)
+        resp = staff.get(reverse("main:admin_portal"))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "5:30 PM")
